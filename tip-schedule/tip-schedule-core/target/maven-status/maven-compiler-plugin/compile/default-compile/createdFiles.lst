@@ -1,0 +1,13 @@
+com\haoyu\tip\schedule\entity\ScheduleRelation.class
+com\haoyu\tip\schedule\event\CreateScheduleEvent.class
+com\haoyu\tip\schedule\dao\IScheduleRelationDao.class
+com\haoyu\tip\schedule\dao\impl\mybatis\ScheduleDao.class
+com\haoyu\tip\schedule\service\IScheduleService.class
+com\haoyu\tip\schedule\web\param\ScheduleParam.class
+com\haoyu\tip\schedule\service\IScheduleRelationService.class
+com\haoyu\tip\schedule\service\impl\ScheduleServiceImpl.class
+com\haoyu\tip\schedule\service\impl\ScheduleRelationServiceImpl.class
+com\haoyu\tip\schedule\dao\impl\mybatis\ScheduleRelationDao.class
+com\haoyu\tip\schedule\dao\IScheduleDao.class
+com\haoyu\tip\schedule\entity\Schedule.class
+com\haoyu\tip\schedule\event\CreateSchedulesEvent.class

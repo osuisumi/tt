@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.haoyu.tip.project.dao.impl.mybatis.ProjectMapper" >
+  <resultMap id="ProjectResultMap" type="com.haoyu.tip.project.entity.Project" >
+    <id column="ID" property="id" jdbcType="VARCHAR" />
+    <result column="NAME" property="name" jdbcType="VARCHAR" />
+    <result column="DESCRIPTION" property="description" jdbcType="VARCHAR" />
+    <result column="STATE" property="state" jdbcType="VARCHAR" />
+    <result column="TYPE" property="type" jdbcType="VARCHAR" />
+    <result column="SITE" property="site" jdbcType="VARCHAR" />
+    <result column="INFO_IMAGE" property="infoImage" jdbcType="VARCHAR" />
+    <result column="INTRO_VIDEO" property="introVideo" jdbcType="VARCHAR" />
+    <result column="START_TIME" property="timePeriod.startTime" jdbcType="DATE"/>
+    <result column="END_TIME" property="timePeriod.endTime" jdbcType="DATE"/>
+    <result column="PROJECT_LEVEL" property="projectLevel" jdbcType="VARCHAR"/>
+  </resultMap>
+  <sql id="Base_Column_List" >
+    M.ID, M.NAME,M.DESCRIPTION,M.RELATION_ID,M.STATE,M.TYPE,M.INFO_IMAGE,M.INTRO_VIDEO,M.SITE,M.CREATE_TIME,M.START_TIME,M.END_TIME,M.PROJECT_LEVEL
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="ProjectResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List"/>
+    from PROJECT M
+    where M.IS_DELETED='N'
+    and M.ID=#{id,jdbcType=VARCHAR}
+  </select>
+  <select id="selectByParameter" resultMap="ProjectResultMap" parameterType="java.util.Map" >
+    select 
+    <include refid="Base_Column_List"/>
+    from PROJECT M
+    where M.IS_DELETED='N'
+    <if test="name!=null and name!=''">
+    	and M.NAME LIKE CONCAT('%',CONCAT(#{name,jdbcType=VARCHAR},'%') )  
+    </if>
+    <if test="state!=null and state!=''">
+    	and M.STATE=#{state,jdbcType=VARCHAR}  
+    </if>
+    <if test="relationId!=null and relationId!=''">
+    	and M.RELATION_ID=#{relationId,jdbcType=VARCHAR}
+    </if>
+  </select>
+  <insert id="insert" parameterType="com.haoyu.tip.project.entity.Project">
+  	insert into PROJECT(ID,NAME,DESCRIPTION,RELATION_ID,STATE,TYPE,INFO_IMAGE,INTRO_VIDEO,SITE,CREATOR,CREATE_TIME,IS_DELETED,VERSION,PROJECT_LEVEL<if test="timePeriod != null">,START_TIME,END_TIME</if>)
+  	values(#{id,jdbcType=VARCHAR},#{name,jdbcType=VARCHAR},#{description,jdbcType=VARCHAR},#{relationId,jdbcType=VARCHAR},#{state,jdbcType=VARCHAR},#{type,jdbcType=VARCHAR},
+  	#{infoImage,jdbcType=VARCHAR},#{introVideo,jdbcType=VARCHAR},#{site,jdbcType=VARCHAR},#{creator.id,jdbcType=VARCHAR},#{createTime,jdbcType=BIGINT},#{isDeleted,jdbcType=VARCHAR},#{version,jdbcType=DECIMAL},#{projectLevel,jdbcType=VARCHAR}
+  	<if test="timePeriod != null">,#{timePeriod.startTime,jdbcType=DATE},#{timePeriod.endTime,jdbcType=DATE}</if>)
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="com.haoyu.tip.project.entity.Project">
+  	update PROJECT
+  	<set >
+      <if test="description != null and description!=''" >
+        DESCRIPTION = #{description,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null and name!=''" >
+        NAME = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="state != null and state!=''" >
+        STATE = #{state,jdbcType=VARCHAR},
+      </if>
+      <if test="type != null and type!=''" >
+        TYPE = #{type,jdbcType=VARCHAR},
+      </if>
+      <if test="infoImage != null and infoImage!=''" >
+        INFO_IMAGE = #{infoImage,jdbcType=VARCHAR},
+      </if>
+      <if test="introVideo != null and introVideo!=''" >
+        INTRO_VIDEO = #{introVideo,jdbcType=VARCHAR},
+      </if>
+      <if test="site != null and site!=''" >
+        SITE = #{site,jdbcType=VARCHAR},
+      </if>
+<!--  <if test="relationId != null and relationId!=''" >
+        RELATION_ID = #{relationId,jdbcType=VARCHAR},
+      </if> -->
+      <if test="projectLevel != null and projectLevel != ''">
+      	PROJECT_LEVEL = #{projectLevel,jdbcType=VARCHAR},
+      </if>
+      <if test="timePeriod != null and timePeriod.startTime != null">
+      	START_TIME = #{timePeriod.startTime,jdbcType=DATE},
+      </if>
+      <if test="timePeriod != null and timePeriod.endTime != null">
+      	END_TIME = #{timePeriod.endTime,jdbcType=DATE},
+      </if>     
+      <if test="updatedby != null" >
+        UPDATEDBY = #{updatedby.id,jdbcType=VARCHAR},
+      </if>
+      <if test="updateTime != null" >
+        UPDATE_TIME = #{updateTime,jdbcType=BIGINT},
+      </if>
+      VERSION = VERSION+1
+    </set>
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <delete id="deleteByPhysics" parameterType="java.lang.String">
+  	delete PROJECT
+    where ID=#{id,jdbcType=VARCHAR}
+  </delete>
+  
+  <update id="deleteProjectByIds" parameterType="java.util.Map">
+  	update PROJECT
+  	set IS_DELETED = 'Y',
+   	<if test="entity!=null and entity.updatedby != null" >
+      UPDATEDBY = #{entity.updatedby.id,jdbcType=VARCHAR},
+    </if>
+    <if test="entity!= null and entity.updateTime != null" >
+      UPDATE_TIME = #{entity.updateTime,jdbcType=BIGINT},
+    </if>
+    VERSION=VERSION+1
+  	where
+  	 ID in
+  	<foreach collection="ids" open="(" close=")" separator="," item="item">
+  		#{item,jdbcType=VARCHAR}
+  	</foreach>
+  </update>
+  
+  <update id="deleteByLogic" parameterType="com.haoyu.tip.project.entity.Project">
+  	  update PROJECT
+  	  set IS_DELETED='Y',
+      <if test="updatedby != null" >
+        UPDATEDBY = #{updatedby.id,jdbcType=VARCHAR},
+      </if>
+      <if test="updateTime != null" >
+        UPDATE_TIME = #{updateTime,jdbcType=BIGINT},
+      </if>
+       VERSION=VERSION+1
+      where 
+      <choose>
+      	<when test="id!=null and id!=''">
+      		ID=#{id,jdbcType=VARCHAR}
+      	</when>
+      	<otherwise>
+      		RELATION_ID=#{relationId,jdbcType=VARCHAR}
+      	</otherwise>
+      </choose>
+  </update>
+</mapper>

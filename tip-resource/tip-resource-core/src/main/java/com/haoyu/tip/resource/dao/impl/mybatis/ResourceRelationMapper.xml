@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.haoyu.tip.resource.dao.impl.mybatis.ResourceRelationMapper">
+	<resultMap id="BaseResultMap" type="com.haoyu.tip.resource.entity.ResourceRelation">
+		<id column="RESOURCE_RELATION_ID" property="id" jdbcType="VARCHAR" />
+		<result column="RELATION_ID" property="relation.id" jdbcType="VARCHAR" />
+    	<result column="BROWSE_NUM" property="browseNum" jdbcType="INTEGER"/>
+    	<result column="DOWNLOAD_NUM" property="downloadNum" jdbcType="INTEGER"/>
+    	<result column="FILE_NUM" property="fileNum" jdbcType="DECIMAL"/>
+    	<result column="REPLY_NUM" property="replyNum" jdbcType="INTEGER"/>
+    	<result column="RESOURCE_RELATION_CREATOR" property="creator.id" jdbcType="VARCHAR" />
+    	<result column="CREATE_TIME" property="createTime" jdbcType="INTEGER" />
+    	<result column="CREATOR" property="creator.id" jdbcType="VARCHAR" />
+    	<result column="REAL_NAME" property="creator.realName" jdbcType="VARCHAR" />
+    	
+    	<result column="ID" property="resource.id" jdbcType="VARCHAR" />
+    	<result column="TITLE" property="resource.title" jdbcType="VARCHAR" />
+    	<result column="SUMMARY" property="resource.summary" jdbcType="VARCHAR" />
+    	<result column="TYPE" property="resource.type" jdbcType="VARCHAR" />
+    	<result column="RELATION_TYPE" property="relation.type" jdbcType="VARCHAR" />
+    	<result column="BELONG" property="resource.belong" jdbcType="VARCHAR" />	
+		<result column="PRIVILEGE" property="resource.privilege" jdbcType="VARCHAR" />	
+	</resultMap>
+	<sql id="Base_Column_List">
+		ID, RESOURCE_ID, RELATION_ID, BROWSE_NUM, DOWNLOAD_NUM, FILE_NUM, REPLY_NUM, CREATOR, CREATE_TIME
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String">
+		select R.ID, R.TITLE, R.SUMMARY, R.TYPE, 
+		RR.ID RESOURCE_RELATION_ID, RR.BROWSE_NUM, RR.DOWNLOAD_NUM, RR.FILE_NUM, RR.REPLY_NUM, RR.RELATION_ID, RR.TYPE RELATION_TYPE, 
+		RR.CREATOR, RR.CREATE_TIME,
+		BUV.REAL_NAME
+		from RESOURCES R
+		join RESOURCE_RELATION RR
+		on R.ID = RR.RESOURCE_ID
+		and RR.IS_DELETED = 'N'
+		and RR.ID = #{id, jdbcType=VARCHAR}
+		join BASE_USER_VIEW BUV
+		on BUV.ID = RR.CREATOR
+	</select>
+	<select id="select" parameterType="map" resultMap="BaseResultMap">
+		select
+			RR.ID RESOURCE_RELATION_ID,
+			RR.BROWSE_NUM,
+			RR.DOWNLOAD_NUM,
+			RR.FILE_NUM,
+			RR.TYPE RELATION_TYPE,
+			RR.RELATION_ID,
+			RR.CREATE_TIME,
+			RR.CREATOR RESOURCE_RELATION_CREATOR,
+			R.ID,
+			R.TITLE,
+			R.SUMMARY,
+			R.CREATOR,
+			R.TYPE,
+			R.BELONG,
+			R.PRIVILEGE,
+			(select BUV.REAL_NAME from BASE_USER_VIEW BUV where BUV.ID = R.CREATOR) REAL_NAME
+		from RESOURCE_RELATION RR
+		join RESOURCES R on R.ID = RR.RESOURCE_ID
+			and R.IS_DELETED = 'N'
+		where
+			RR.IS_DELETED = 'N'
+		<if test="state!=null and state!=''">
+			and R.STATE=#{state,jdbcType=VARCHAR}
+		</if>
+		<if test="title!=null and title!=''">
+			and R.TITLE like '%${title}%'
+		</if>
+		<if test="relationType!=null and relationType!=''">
+			and RR.TYPE=#{relationType,jdbcType=VARCHAR}
+		</if>
+		<if test="relationTypes != null and relationTypes.size > 0">
+			and RR.TYPE in  
+			<foreach collection="relationTypes" open="(" close=")" item="item" separator=",">
+				#{item}
+			</foreach>
+		</if>
+		<if test="type!=null and type != ''">
+			and R.TYPE=#{type,jdbcType=VARCHAR}
+		</if>
+		<if test="creator!=null and creator!=''">
+			and R.CREATOR=#{creator,jdbcType=VARCHAR}
+		</if>
+		<if test="belong != null and belong != ''">
+			and R.BELONG=#{belong,jdbcType=VARCHAR}
+		</if>
+		<if test="privilege != null and privilege != ''">
+			and R.PRIVILEGE=#{privilege,jdbcType=VARCHAR}
+		</if>
+		<if test="relationIds != null and relationIds.size > 0">
+			and RR.RELATION_ID in 
+			<foreach collection="relationIds" open="(" close=")" item="item" separator=",">
+				#{item}
+			</foreach>
+		</if>
+	</select>
+	<insert id="insert" parameterType="com.haoyu.tip.resource.entity.ResourceRelation">
+		insert into RESOURCE_RELATION
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				ID,
+			</if>
+			<if test="resource != null">
+				RESOURCE_ID,
+			</if>
+			<if test="relation != null">
+				RELATION_ID,
+			</if>
+			<if test="browseNum != null">
+				BROWSE_NUM,
+			</if>
+			<if test="downloadNum != null">
+				DOWNLOAD_NUM,
+			</if>
+			<if test="fileNum != null">
+				FILE_NUM,
+			</if>
+			<if test="replyNum != null">
+				REPLY_NUM,
+			</if>
+			<if test="relation != null and relation.type != null">
+				TYPE,
+			</if>
+			<if test="creator != null and creator.id != null">
+				CREATOR,
+			</if>
+			<if test="createTime != null">
+				CREATE_TIME,
+			</if>
+			<if test="updatedby != null and updatedby.id != null">
+				UPDATEDBY,
+			</if>
+			<if test="updateTime != null">
+				UPDATE_TIME,
+			</if>
+			<if test="isDeleted != null">
+				IS_DELETED,
+			</if>
+			<if test="version != null">
+				VERSION,
+			</if>
+			<if test="supportNum != null">
+				SUPPORT_NUM,
+			</if>
+			<if test="collectNum != null">
+				COLLECT_NUM,
+			</if>
+			<if test="voteNum != null">
+				VOTE_NUM,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=VARCHAR},
+			</if>
+			<if test="resource != null">
+				#{resource.id,jdbcType=VARCHAR},
+			</if>
+			<if test="relation != null">
+				#{relation.id,jdbcType=VARCHAR},
+			</if>
+			<if test="browseNum != null">
+				#{browseNum,jdbcType=DECIMAL},
+			</if>
+			<if test="downloadNum != null">
+				#{downloadNum,jdbcType=DECIMAL},
+			</if>
+			<if test="fileNum != null">
+				#{fileNum,jdbcType=DECIMAL},
+			</if>
+			<if test="replyNum != null">
+				#{replyNum,jdbcType=DECIMAL},
+			</if>
+			<if test="relation != null and relation.type != null">
+				#{relation.type,jdbcType=VARCHAR},
+			</if>
+			<if test="creator != null and creator.id != null">
+				#{creator.id,jdbcType=VARCHAR},
+			</if>
+			<if test="createTime != null">
+				#{createTime,jdbcType=INTEGER},
+			</if>
+			<if test="updatedby != null and updatedby.id != null">
+				#{updatedby.id,jdbcType=VARCHAR},
+			</if>
+			<if test="updateTime != null">
+				#{updateTime,jdbcType=INTEGER},
+			</if>
+			<if test="isDeleted != null">
+				#{isDeleted,jdbcType=CHAR},
+			</if>
+			<if test="version != null">
+				#{version,jdbcType=DECIMAL},
+			</if>
+			<if test="supportNum != null">
+				#{supportNum,jdbcType=DECIMAL},
+			</if>
+			<if test="collectNum != null">
+				#{collectNum,jdbcType=DECIMAL},
+			</if>
+			<if test="voteNum != null">
+				#{voteNum,jdbcType=DECIMAL},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKey" parameterType="com.haoyu.tip.resource.entity.ResourceRelation">
+		update RESOURCE_RELATION RE
+		<set>
+			<if test="relation != null and relation.id != null and relation.id != '' ">
+				RELATION_ID = #{relation.id,jdbcType=VARCHAR},
+			</if>
+			<if test="relation != null and relation.type != null and relation.type != '' ">
+				TYPE = #{relation.type,jdbcType=VARCHAR},
+			</if>
+			<if test="browseNum != null and browseNum > 0">
+				BROWSE_NUM = BROWSE_NUM + 1,
+			</if>
+			<if test="downloadNum != null and downloadNum > 0">
+				DOWNLOAD_NUM = DOWNLOAD_NUM + 1,
+			</if>
+			<if test="fileNum != null">
+				FILE_NUM = #{fileNum,jdbcType=DECIMAL},
+			</if>
+			<if test="replyNum != null and replyNum > 0">
+				REPLY_NUM = (select count(ID) from COMMENTS where RELATION_ID = RE.RESOURCE_ID  and IS_DELETED = 'N'),
+			</if>
+			<if test="supportNum!=null and supportNum>0">
+				SUPPORT_NUM = (select count(ID) from ATTITUDE_USER where RELATION_ID =RESOURCE_ID and ATTITUDE = 'support' and IS_DELETED='N'),
+			</if>
+			<if test="voteNum != null and voteNum>0">
+				VOTE_NUM = (select count(ID) from ATTITUDE_USER where RELATION_ID =RESOURCE_ID and ATTITUDE = 'vote' and IS_DELETED='N'),
+			</if>
+			<if test="updatedby != null and updatedby.id != null">
+				UPDATEDBY = #{updatedby.id,jdbcType=VARCHAR},
+			</if>
+			<if test="updateTime != null">
+				UPDATE_TIME = #{updateTime,jdbcType=INTEGER},
+			</if>
+			<if test="isDeleted != null">
+				IS_DELETED = #{isDeleted,jdbcType=CHAR},
+			</if>
+		</set>
+		,VERSION = VERSION + 1
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<update id="deleteByLogic" parameterType="com.haoyu.tip.resource.entity.ResourceRelation">
+		update RESOURCE_RELATION
+		set IS_DELETED = 'Y', UPDATE_TIME = #{updateTime,jdbcType=INTEGER}
+		<if test="updatedby != null and updatedby.id != null and updatedby.id != ''">
+			,UPDATEDBY = #{updatedby.id,jdbcType=VARCHAR}
+		</if>
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<delete id="deleteByRelationId" parameterType="string">
+		delete from RESOURCE_RELATION
+		where RELATION_ID = #{relationId, jdbcType=VARCHAR}
+	</delete>
+</mapper>

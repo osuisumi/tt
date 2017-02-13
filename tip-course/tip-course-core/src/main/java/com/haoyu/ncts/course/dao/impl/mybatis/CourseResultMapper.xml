@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.haoyu.ncts.course.dao.impl.mybatis.CourseResultMapper">
+	<resultMap id="BaseResultMap" type="com.haoyu.ncts.course.entity.CourseResult">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="COURSE_ID" property="course.id" jdbcType="VARCHAR" />
+		<result column="USER_ID" property="user.id" jdbcType="VARCHAR" />
+		<result column="STATE" property="state" jdbcType="VARCHAR" />
+		<result column="SCORE" property="score" jdbcType="DECIMAL" />
+		<result column="DETAIL" property="detail" jdbcType="VARCHAR" />
+		<result column="CREATOR" property="creator.id" jdbcType="VARCHAR" />
+		<result column="CREATE_TIME" property="createTime" jdbcType="TIMESTAMP" />
+	</resultMap>
+	<sql id="BaseSelectSql">
+		select CR.ID,CR.COURSE_ID,CR.USER_ID,CR.STATE,CR.SCORE,CR.CREATOR,CR.CREATE_TIME
+		from COURSE_RESULT CR 
+	</sql>
+	<select id="select" parameterType="map" resultMap="BaseResultMap">
+		<include refid="BaseSelectSql" />
+		where CR.IS_DELETED = 'N'
+		<if test="courseId != null and courseId != ''">
+			and CR.COURSE_ID = #{courseId,jdbcType=VARCHAR}
+		</if>
+		<if test="courseIds != null">
+			and CR.COURSE_ID in 
+			<foreach collection="courseIds" open="(" close=")" item="cid" separator=",">
+				#{cid,jdbcType=VARCHAR}
+			</foreach>
+		</if>
+		<if test="relationId != null and relationId != ''">
+			and CR.RELATION_ID = #{relationId,jdbcType=VARCHAR}
+		</if>
+		<if test="state != null and state != ''">
+			and CR.STATE = #{state,jdbcType=VARCHAR}
+		</if>
+		<if test="userId != null and userId != ''">
+			and CR.USER_ID = #{userId,jdbcType=VARCHAR}
+		</if>
+		<if test="userIds != null">
+			and CR.USER_ID in
+			<foreach collection="userIds" open="(" close=")" item="item" separator=",">
+				#{item,jdbcType=VARCHAR}
+			</foreach>
+		</if>
+	</select>
+	<select id="selectByPrimaryKey" parameterType="string" resultMap="BaseResultMap">
+		<include refid="BaseSelectSql" /> 
+		where CR.ID = #{id, jdbcType=VARCHAR}
+	</select>
+	<insert id="insert" parameterType="com.haoyu.ncts.course.entity.CourseResult">
+		insert into COURSE_RESULT
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				ID,
+			</if>
+			<if test="course != null and course.id != null">
+				COURSE_ID,
+			</if>
+			<if test="relation != null and relation.id != null">
+				RELATION_ID,
+			</if>
+			<if test="user != null and user.id != null">
+				USER_ID,
+			</if>
+			<if test="state != null">
+				STATE,
+			</if>
+			<if test="score != null">
+				SCORE,
+			</if>
+			<if test="detail != null">
+				DETAIL,
+			</if>
+			<if test="creator != null">
+				CREATOR,
+			</if>
+			<if test="createTime != null">
+				CREATE_TIME,
+			</if>
+			<if test="isDeleted != null">
+				IS_DELETED,
+			</if>
+			<if test="version != null">
+				VERSION,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=VARCHAR},
+			</if>
+			<if test="course != null and course.id != null">
+				#{course.id,jdbcType=VARCHAR},
+			</if>
+			<if test="relation != null and relation.id != null">
+				#{relation.id,jdbcType=VARCHAR},
+			</if>
+			<if test="user != null and user.id != null">
+				#{user.id,jdbcType=VARCHAR},
+			</if>
+			<if test="state != null">
+				#{state,jdbcType=VARCHAR},
+			</if>
+			<if test="score != null">
+				#{score,jdbcType=DECIMAL},
+			</if>
+			<if test="detail != null">
+				#{detail,jdbcType=VARCHAR},
+			</if>
+			<if test="creator != null">
+				#{creator.id,jdbcType=VARCHAR},
+			</if>
+			<if test="createTime != null">
+				#{createTime,jdbcType=DECIMAL},
+			</if>
+			<if test="isDeleted != null">
+				#{isDeleted,jdbcType=VARCHAR},
+			</if>
+			<if test="version != null">
+				#{version,jdbcType=DECIMAL},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKey" parameterType="com.haoyu.ncts.course.entity.CourseResult">
+		update COURSE_RESULT
+		<set>
+			<if test="state != null">
+				STATE = #{state,jdbcType=VARCHAR},
+			</if>
+			<if test="score != null">
+				SCORE = #{score,jdbcType=DECIMAL},
+			</if>
+			<if test="detail != null">
+				DETAIL = #{detail,jdbcType=VARCHAR},
+			</if>
+		</set>
+		,VERSION = VERSION + 1
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<select id="getCount" parameterType="map" resultType="int">
+		select count(ID)
+		from COURSE_RESULT
+		where IS_DELETED = 'N'
+		<if test="userId != null and userId != ''">
+			and USER_ID = #{userId}
+		</if>
+		<if test="state != null and state != ''">
+			and STATE = #{state}
+		</if>
+		<if test="courseIds != null">
+			and COURSE_ID in
+			<foreach collection="courseIds" item="item" open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+		</if>
+	</select>
+</mapper>

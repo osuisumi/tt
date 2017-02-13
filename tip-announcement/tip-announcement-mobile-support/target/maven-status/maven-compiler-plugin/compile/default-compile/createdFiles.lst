@@ -1,0 +1,5 @@
+com\haoyu\tip\announcement\mobile\entity\MAnnouncement.class
+com\haoyu\tip\announcement\mobile\service\impl\MAnnouncementServiceImpl.class
+com\haoyu\tip\announcement\mobile\controller\MAnnouncementController.class
+com\haoyu\tip\announcement\mobile\entity\MAnnouncementUser.class
+com\haoyu\tip\announcement\mobile\service\IMAnnouncementService.class

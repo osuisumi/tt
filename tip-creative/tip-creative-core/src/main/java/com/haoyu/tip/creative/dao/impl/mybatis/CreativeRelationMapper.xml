@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.haoyu.tip.creative.dao.impl.mybatis.CreativeRelationMapper">
+    
+	<resultMap id="BaseResultMap" type="com.haoyu.tip.creative.entity.CreativeRelation">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="CREATIVE_ID" property="creative.id" jdbcType="VARCHAR" />
+		<result column="RELATION_ID" property="relation.id" jdbcType="VARCHAR" />
+		<result column="RELATION_TYPE" property="relation.type" jdbcType="VARCHAR" />
+		<result column="BROWSE_NUM" property="browseNum" jdbcType="INTEGER" />
+		<result column="SUPPORT_NUM" property="supportNum" jdbcType="INTEGER" />
+		<result column="PARTICIPATE_NUM" property="participateNum" jdbcType="INTEGER" />
+		<result column="COLLECT_DAYS" property="collectDays" jdbcType="INTEGER" />
+		<result column="COLLECT_START_TIME" property="collectTimePeriod.startTime" jdbcType="TIMESTAMP" />
+		<result column="COLLECT_END_TIME" property="collectTimePeriod.endTime" jdbcType="TIMESTAMP" />
+		<result column="CREATOR" property="creator.id" jdbcType="VARCHAR" />
+		<result column="CREATE_TIME" property="createTime" jdbcType="INTEGER" />
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		CR.ID,
+		CR.CREATIVE_ID,
+		CR.RELATION_ID,
+		CR.RELATION_TYPE,
+		CR.BROWSE_NUM,
+		CR.SUPPORT_NUM,
+		CR.PARTICIPATE_NUM,
+		CR.COLLECT_DAYS,
+		CR.COLLECT_START_TIME,
+		CR.COLLECT_END_TIME,
+		CR.CREATE_TIME,
+		CR.CREATOR
+	</sql>
+
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from 
+			CREATIVE_RELATION CR
+		where 
+			CR.IS_DELETED = 'N' and CR.ID = #{id,jdbcType=VARCHAR}
+	</select>
+
+	<select id="selectByParameter" parameterType="java.util.Map" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from 
+			CREATIVE_RELATION CR
+		where 
+			CR.IS_DELETED = 'N'
+	</select>
+
+	<insert id="insert" parameterType="com.haoyu.tip.creative.entity.CreativeRelation">
+		insert into CREATIVE_RELATION
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null and id != ''">
+			    ID,
+			</if>
+			<if test="creative != null and creative.id != null and creative.id != ''">
+			    CREATIVE_ID,
+		    </if>
+			<if test="relation != null and relation.id != null and relation.id != ''">
+			    RELATION_ID,
+		    </if>
+			<if test="relation != null and relation.type != null and relation.type != ''">
+			    RELATION_TYPE,
+		    </if>
+			<if test="browseNum != null">
+			    BROWSE_NUM,
+		    </if>
+			<if test="supportNum != null">
+			    SUPPORT_NUM,
+		    </if>
+			<if test="participateNum != null">
+			    PARTICIPATE_NUM,
+		    </if>
+			<if test="collectDays != null">
+			    COLLECT_DAYS,
+		    </if>
+			<if test="collectTimePeriod != null and collectTimePeriod.startTime != null">
+			    COLLECT_START_TIME,
+		    </if>
+			<if test="collectTimePeriod != null and collectTimePeriod.endTime != null">
+			    COLLECT_END_TIME,
+		    </if>
+			<if test="creator != null and creator.id != null and creator.id != ''">
+			    CREATOR,
+		    </if>
+			<if test="createTime != null and createTime > 0">
+			    CREATE_TIME,
+		    </if>
+			<if test="version != null">
+			    VERSION,
+		    </if>
+			<if test="isDeleted != null">
+			    IS_DELETED,
+		    </if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null and id != ''">
+			    #{id,jdbcType=VARCHAR},
+		    </if>
+			<if test="creative != null and creative.id != null and creative.id != ''">
+			    #{creative.id,jdbcType=VARCHAR},
+		    </if>
+			<if test="relation != null and relation.id != null and relation.id != ''">
+			    #{relation.id,jdbcType=VARCHAR},
+		    </if>
+			<if test="relation != null and relation.type != null and relation.type != ''">
+			    #{relation.type,jdbcType=VARCHAR},
+		    </if>
+			<if test="browseNum != null">
+			    #{browseNum,jdbcType=INTEGER},
+		    </if>
+			<if test="supportNum != null">
+			    #{supportNum,jdbcType=INTEGER},
+		    </if>
+			<if test="participateNum != null">
+			    #{participateNum,jdbcType=INTEGER},
+		    </if>
+			<if test="collectDays != null">
+			    #{collectDays,jdbcType=INTEGER},
+		    </if>
+			<if test="collectTimePeriod != null and collectTimePeriod.startTime != null">
+			    #{collectTimePeriod.startTime,jdbcType=TIMESTAMP},
+		    </if>
+			<if test="collectTimePeriod != null and collectTimePeriod.endTime != null">
+			    #{collectTimePeriod.endTime,jdbcType=TIMESTAMP},
+		    </if>
+			<if test="creator != null and creator.id != null">
+			    #{creator.id,jdbcType=VARCHAR},
+		    </if>
+			<if test="createTime != null">
+			    #{createTime,jdbcType=VARCHAR},
+		    </if>
+			<if test="version != null">
+			    #{version,jdbcType=DECIMAL},
+		    </if>
+			<if test="isDeleted != null">
+			    #{isDeleted,jdbcType=VARCHAR},
+		    </if>
+		</trim>
+	</insert>
+	
+	<update id="updateByPrimaryKey" parameterType="com.haoyu.tip.creative.entity.CreativeRelation">
+		update CREATIVE_RELATION CRN
+		<set>
+			<if test="browseNum != null and browseNum > 0">
+				BROWSE_NUM = BROWSE_NUM + 1,
+			</if>
+			<if test="supportNum != null and supportNum > 0">
+				SUPPORT_NUM = (select count(ID) from ATTITUDE_USER where RELATION_ID = CRN.CREATIVE_ID and ATTITUDE = 'support' and IS_DELETED='N'),
+			</if>
+			<if test="participateNum != null and participateNum > 0">
+				PARTICIPATE_NUM = PARTICIPATE_NUM + 1,
+			</if>
+			<if test="collectDays != null">
+			    COLLECT_DAYS = #{collectDays,jdbcType=INTEGER},
+		    </if>
+			<if test="collectTimePeriod != null and collectTimePeriod.startTime != null">
+			   COLLECT_START_TIME =  #{collectTimePeriod.startTime,jdbcType=TIMESTAMP},
+		    </if>
+			<if test="collectTimePeriod != null and collectTimePeriod.endTime != null">
+			    COLLECT_END_TIME = #{collectTimePeriod.endTime,jdbcType=TIMESTAMP},
+		    </if>
+			<if test="updatedby != null and updatedby.id != null">
+				UPDATEDBY = #{updatedby.id,jdbcType=VARCHAR},
+			</if>
+			<if test="updateTime != null and updateTime > 0">
+				UPDATE_TIME = #{updateTime,jdbcType=BIGINT},
+			</if>
+			VERSION = VERSION+1
+		</set>
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	
+	<update id="deleteByLogic" parameterType="com.haoyu.tip.creative.entity.CreativeRelation">
+	    update CREATIVE_RELATION
+	    set IS_DELETED = 'Y', UPDATE_TIME = #{updateTime,jdbcType=DECIMAL}
+		<if test="updatedby != null and updatedby.id != null and updatedby.id != ''">
+			,UPDATEDBY = #{updatedby.id,jdbcType=VARCHAR}
+		</if>
+		,VERSION = VERSION + 1
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	
+</mapper>

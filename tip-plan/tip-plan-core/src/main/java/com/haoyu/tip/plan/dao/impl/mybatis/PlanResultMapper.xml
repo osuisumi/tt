@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.haoyu.tip.plan.dao.impl.mybatis.PlanResultMapper">
+	<resultMap id="BaseResultMap" type="com.haoyu.tip.plan.entity.PlanResult">
+		<result column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="PLAN_ID" property="planId" jdbcType="VARCHAR" />
+		<result column="TITLE" property="title" jdbcType="VARCHAR" />
+		<result column="TYPE" property="type" jdbcType="VARCHAR" />
+		<result column="SUMMARY" property="summary" jdbcType="VARCHAR" />
+		<result column="FILE_NUM" property="fileNum" jdbcType="INTEGER" />
+		<result column="BROWSE_NUM" property="browseNum" jdbcType="INTEGER" />
+		<result column="DOWNLOAD_NUM" property="downloadNum" jdbcType="INTEGER" />
+		<result column="CREATOR" property="creator.id" jdbcType="VARCHAR" />
+		<result column="CREATE_TIME" property="createTime" jdbcType="DECIMAL" />
+		<result column="REAL_NAME" property="creator.realName" jdbcType="VARCHAR" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		ID, PLAN_ID, TITLE, TYPE, SUMMARY, CREATOR, CREATE_TIME, FILE_NUM, BROWSE_NUM, DOWNLOAD_NUM
+	</sql>
+	<sql id="selectColumnSQL">
+		select PRT.ID, PRT.PLAN_ID, PRT.TITLE, PRT.TYPE, PRT.SUMMARY, PRT.CREATOR, PRT.CREATE_TIME, PRT.FILE_NUM, PRT.BROWSE_NUM, PRT.DOWNLOAD_NUM,
+		BUV.REAL_NAME
+		from PLAN_RESULT PRT
+		join BASE_USER_VIEW BUV
+		on BUV.ID = PRT.CREATOR
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String">
+		<include refid="selectColumnSQL" />
+		where PRT.ID = #{id,jdbcType=VARCHAR}
+	</select>
+	<select id="select" parameterType="com.haoyu.tip.plan.entity.PlanResult" resultMap="BaseResultMap">
+		<include refid="selectColumnSQL" />
+		where PRT.IS_DELETED = 'N'
+		<if test="planId != null and planId != ''">
+			and PRT.PLAN_ID = #{planId}
+		</if>
+		<if test="planIds != null and planIds != ''">
+			and PRT.PLAN_ID in
+			<foreach collection="planIds" open="(" close=")" separator="," item="item">
+				#{item}
+			</foreach>
+		</if>
+	</select>
+	<insert id="insert" parameterType="com.haoyu.tip.plan.entity.PlanResult">
+		insert into PLAN_RESULT
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				ID,
+			</if>
+			<if test="planId != null">
+				PLAN_ID,
+			</if>
+			<if test="title != null">
+				TITLE,
+			</if>
+			<if test="type != null">  
+				TYPE,
+			</if>
+			<if test="summary != null">
+				SUMMARY,
+			</if>
+			<if test="fileNum != null">
+				FILE_NUM,
+			</if>
+			<if test="downloadNum != null">
+				DOWNLOAD_NUM,
+			</if>
+			<if test="browseNum != null">
+				BROWSE_NUM,
+			</if>
+			<if test="creator != null and creator.id != null">
+				CREATOR,
+			</if>
+			<if test="createTime != null and createTime > 0">
+				CREATE_TIME,
+			</if>
+			<if test="updatedby != null and updatedby.id != null">
+				UPDATEDBY,
+			</if>
+			<if test="updateTime != null and updateTime > 0">
+				UPDATE_TIME,
+			</if>
+			<if test="isDeleted != null">
+				IS_DELETED,
+			</if>
+			<if test="version != null">
+				VERSION,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=VARCHAR},
+			</if>
+			<if test="planId != null">
+				#{planId,jdbcType=VARCHAR},
+			</if>
+			<if test="title != null">
+				#{title,jdbcType=VARCHAR},
+			</if>
+			<if test="type != null">
+				#{type,jdbcType=VARCHAR},
+			</if>
+			<if test="summary != null">
+				#{summary,jdbcType=VARCHAR},
+			</if>
+			<if test="fileNum != null">
+				#{fileNum,jdbcType=INTEGER},
+			</if>
+			<if test="downloadNum != null">
+				#{downloadNum,jdbcType=INTEGER},
+			</if>
+			<if test="browseNum != null">
+				#{browseNum,jdbcType=INTEGER},
+			</if>
+			<if test="creator != null and creator.id != null">
+				#{creator.id,jdbcType=VARCHAR},
+			</if>
+			<if test="createTime != null and createTime > 0">
+				#{createTime,jdbcType=DECIMAL},
+			</if>
+			<if test="updatedby != null and updatedby.id != null">
+				#{updatedby.id,jdbcType=VARCHAR},
+			</if>
+			<if test="updateTime != null and updateTime > 0">
+				#{updateTime,jdbcType=DECIMAL},
+			</if>
+			<if test="isDeleted != null">
+				#{isDeleted,jdbcType=CHAR},
+			</if>
+			<if test="version != null">
+				#{version,jdbcType=DECIMAL},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKey" parameterType="com.haoyu.tip.plan.entity.PlanResult">
+		update PLAN_RESULT
+		<set>
+			<if test="title != null">
+				TITLE = #{title,jdbcType=VARCHAR},
+			</if>
+			<if test="type != null">
+				TYPE = #{type,jdbcType=VARCHAR},
+			</if>
+			<if test="summary != null">
+				SUMMARY = #{summary,jdbcType=VARCHAR},
+			</if>
+			<if test="downloadNum != null and downloadNum > 0">
+				DOWNLOAD_NUM = DOWNLOAD_NUM + 1,
+			</if>
+			<if test="browseNum != null and browseNum > 0">
+				BROWSE_NUM = BROWSE_NUM + 1,
+			</if>
+			<if test="updatedby != null and updatedby.id != null">
+				UPDATEDBY = #{updatedby.id,jdbcType=VARCHAR},
+			</if>
+			<if test="updateTime != null">
+				UPDATE_TIME = #{updateTime,jdbcType=INTEGER},
+			</if>
+			<if test="isDeleted != null">
+				IS_DELETED = #{isDeleted,jdbcType=CHAR},
+			</if>
+		</set>
+		,VERSION = VERSION + 1
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<update id="deleteByLogic" parameterType="com.haoyu.tip.plan.entity.Plan">
+		update PLAN_RESULT
+		set IS_DELETED = 'Y', UPDATE_TIME = #{updateTime,jdbcType=INTEGER}
+		<if test="updatedby != null and updatedby.id != null and updatedby.id != ''">
+			,UPDATEDBY = #{updatedby.id,jdbcType=VARCHAR}
+		</if>
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+</mapper>

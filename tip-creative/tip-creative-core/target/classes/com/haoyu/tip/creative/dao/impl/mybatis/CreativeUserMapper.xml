@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.haoyu.tip.creative.dao.impl.mybatis.CreativeUserMapper">
+    
+	<resultMap id="BaseResultMap" type="com.haoyu.tip.creative.entity.CreativeUser">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="CREATIVE_ID" property="creative.id" jdbcType="VARCHAR"/>
+		<result column="USER_ID" property="user.id" jdbcType="VARCHAR"/>
+		<result column="USER_REAL_NAME" property="user.realName" jdbcType="VARCHAR"/>
+		<result column="ROLE" property="role" jdbcType="VARCHAR"/>
+		<result column="STATE" property="state" jdbcType="VARCHAR"/>
+		<result column="CREATOR" property="creator.id" jdbcType="VARCHAR"/>
+		<result column="CREATE_TIME" property="createTime" jdbcType="INTEGER"/>
+	</resultMap>
+	
+	<sql id="Base_Column_List">
+		CU.ID,
+		CU.CREATIVE_ID,
+		CU.USER_ID,
+		CU.ROLE,
+		CU.STATE,
+		CU.CREATE_TIME,
+		CU.CREATOR
+	</sql>
+	
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String">
+		select	
+		<include refid="Base_Column_List" />
+		from CREATIVE_USER CU
+		where CU.IS_DELETED = 'N'
+		and CU.ID = #{id,jdbcType=VARCHAR}
+	</select>
+	
+	<select id="selectByParameter" parameterType="java.util.Map" resultMap="BaseResultMap">
+		select 
+			CU.ID,
+			CU.CREATIVE_ID,
+			CU.USER_ID,
+			CU.ROLE,
+			CU.STATE,
+			CU.CREATE_TIME,
+			CU.CREATOR,
+			BUV.REAL_NAME USER_REAL_NAME
+		from 
+			CREATIVE_USER CU
+		inner join BASE_USER_VIEW BUV on BUV.ID = CU.USER_ID
+		where 
+			CU.IS_DELETED = 'N'
+		<if test="userId != null and userId != ''">
+		    and CU.USER_ID = #{userId,jdbcType=VARCHAR}
+		</if>
+		<if test="creativeId != null and creativeId != ''">
+		    and CU.CREATIVE_ID = #{creativeId,jdbcType=VARCHAR}
+		</if>
+		<if test="role != null and role != ''">
+		    and CU.ROLE = #{role,jdbcType=VARCHAR}
+		</if>
+		<if test="creativeIds != null and creativeIds.size > 0 ">
+		    and CU.CREATIVE_ID in
+		    <foreach collection="creativeIds" open="(" close=")" item="creativeId" separator=",">
+				#{creativeId}
+			</foreach>
+		</if>
+	</select>
+	
+	<insert id="insert" parameterType="com.haoyu.tip.creative.entity.CreativeUser">
+		insert into CREATIVE_USER
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null and id != ''">
+			    ID,
+			</if>
+			<if test="creative != null and creative.id != null and creative.id != ''">
+			    CREATIVE_ID,
+		    </if>
+			<if test="user != null and user.id != null and user.id != ''">
+			    USER_ID,
+		    </if>
+			<if test="role != null and role != ''">
+			    ROLE,
+		    </if>
+			<if test="state != null and state != ''">
+			    STATE,
+		    </if>
+			<if test="creator != null and creator.id != null and creator.id != ''">
+			    CREATOR,
+		    </if>
+			<if test="createTime != null and createTime > 0">
+			    CREATE_TIME,
+		    </if>
+			<if test="version != null">
+			    VERSION,
+		    </if>
+			<if test="isDeleted != null">
+			    IS_DELETED,
+		    </if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null and id != ''">
+			    #{id,jdbcType=VARCHAR},
+		    </if>
+			<if test="creative != null and creative.id != null and creative.id != ''">
+			    #{creative.id,jdbcType=VARCHAR},
+		    </if>
+			<if test="user != null and user.id != null and user.id != ''">
+			    #{user.id,jdbcType=VARCHAR},
+		    </if>
+			<if test="role != null and role != ''">
+			    #{role,jdbcType=VARCHAR},
+		    </if>
+			<if test="state != null and state != ''">
+			    #{state,jdbcType=VARCHAR},
+		    </if>
+			<if test="creator != null and creator.id != null and creator.id != ''">
+			    #{creator.id,jdbcType=VARCHAR},
+		    </if>
+			<if test="createTime != null and createTime > 0">
+			    #{createTime,jdbcType=BIGINT},
+		    </if>
+			<if test="version != null">
+			    #{version,jdbcType=DECIMAL},
+		    </if>
+			<if test="isDeleted != null">
+			    #{isDeleted,jdbcType=VARCHAR},
+		    </if>
+		</trim>
+	</insert>
+	
+	<update id="updateByPrimaryKey" parameterType="com.haoyu.tip.creative.entity.CreativeUser">
+	    update CREATIVE_USER
+	    <set>
+	        <if test="creative != null and creative.id != null and creative.id != ''">
+				CREATIVE_ID = #{creative.id,jdbcType=VARCHAR},
+		    </if>
+			<if test="user != null and user.id != null and user.id != ''">
+			    USER_ID = #{userId,jdbcType=VARCHAR},
+		    </if>
+			<if test="role != null and role != ''">
+			    ROLE = #{role,jdbcType=VARCHAR},
+		    </if>
+			<if test="state != null and state != ''">
+			    STATE = #{state,jdbcType=VARCHAR},
+		    </if>
+		    <if test="updatedby != null and updatedby.id != null">
+				UPDATEDBY = #{updatedby.id,jdbcType=VARCHAR},
+			</if>
+			<if test="updateTime != null and updateTime > 0">
+				UPDATE_TIME = #{updateTime,jdbcType=DECIMAL},
+			</if>
+			VERSION = VERSION+1
+        </set>
+	</update>
+	
+	<update id="deleteByLogic" parameterType="com.haoyu.tip.creative.entity.CreativeUser">
+		update CREATIVE_USER
+		set IS_DELETED = 'Y', UPDATE_TIME = #{updateTime,jdbcType=DECIMAL}
+		<if test="updatedby != null and updatedby.id != null and updatedby.id != ''">
+			,UPDATEDBY = #{updatedby.id,jdbcType=VARCHAR}
+		</if>
+		,VERSION = VERSION + 1
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	
+</mapper>

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.haoyu.tip.announcement.dao.impl.mybatis.AnnouncementUserMapper">
+	<resultMap id="BaseResultMap" type="com.haoyu.tip.announcement.entity.AnnouncementUser">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="ANNOUNCEMENT_ID" property="announcementId" jdbcType="VARCHAR" />
+	</resultMap>
+	<insert id="insert" parameterType="com.haoyu.tip.announcement.entity.AnnouncementRelation">
+		insert into ANNOUNCEMENT_USER
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				ID,
+			</if>
+			<if test="announcement != null">
+				ANNOUNCEMENT_ID,
+			</if>
+			<if test="creator != null">
+				CREATOR,
+			</if>
+			<if test="createTime != null">
+				CREATE_TIME,
+			</if>
+			<if test="updatedby != null">
+				UPDATEDBY,
+			</if>
+			<if test="updateTime != null">
+				UPDATE_TIME,
+			</if>
+			<if test="version != null">
+				VERSION,
+			</if>
+			<if test="isDeleted != null">
+				IS_DELETED,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=VARCHAR},
+			</if>
+			<if test="announcement != null">
+				#{announcement.id,jdbcType=VARCHAR},
+			</if>
+			<if test="creator != null">
+				#{creator.id,jdbcType=VARCHAR},
+			</if>
+			<if test="createTime != null">
+				#{createTime,jdbcType=INTEGER},
+			</if>
+			<if test="updatedby != null">
+				#{updatedby.id,jdbcType=VARCHAR},
+			</if>
+			<if test="updateTime != null">
+				#{updateTime,jdbcType=INTEGER},
+			</if>
+			<if test="version != null">
+				#{version,jdbcType=DECIMAL},
+			</if>
+			<if test="isDeleted != null">
+				#{isDeleted,jdbcType=CHAR},
+			</if>
+		</trim>
+	</insert>
+</mapper>

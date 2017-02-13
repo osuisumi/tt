@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.haoyu.tip.subjectgroup.dao.impl.mybatis.SubjectGroupAuthorizeMapper">
+	<resultMap id="BaseResultMap" type="com.haoyu.tip.subjectgroup.entity.SubjectGroupAuthorize">
+		<result column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="SUBJECT_GROUP_ID" property="subjectGroupId" jdbcType="VARCHAR" />
+		<result column="USER_ID" property="user.id" jdbcType="VARCHAR" />
+		<result column="ROLE" property="role" jdbcType="VARCHAR" />
+		<result column="STATE" property="state" jdbcType="VARCHAR" />
+		<result column="CREATOR" property="creator.id" jdbcType="VARCHAR" />
+		<result column="CREATE_TIME" property="createTime" jdbcType="DECIMAL" />
+		<result column="REAL_NAME" property="user.realName" jdbcType="VARCHAR" />
+		<result column="AVATAR" property="user.avatar" jdbcType="VARCHAR" />
+	</resultMap>
+	<resultMap id="UserResultMap" type="com.haoyu.sip.core.entity.User">
+		<result column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="REAL_NAME" property="realName" jdbcType="VARCHAR" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		ID, SUBJECT_GROUP_ID, USER_ID, ROLE, STATE
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from SUBJECT_GROUP_AUTHORIZE
+		where ID = #{id,jdbcType=VARCHAR}
+	</select>
+	<select id="select" parameterType="map" resultMap="BaseResultMap">
+		select SGA.ID, SGA.SUBJECT_GROUP_ID, SGA.USER_ID, SGA.ROLE, SGA.STATE, SGA.CREATE_TIME,
+		BUV.REAL_NAME, BUV.AVATAR
+		from SUBJECT_GROUP_AUTHORIZE SGA
+		join BASE_USER_VIEW BUV
+		on BUV.ID = SGA.USER_ID
+		where SGA.IS_DELETED = 'N'
+		<if test="subjectGroupId != null and subjectGroupId != ''">
+			and SGA.SUBJECT_GROUP_ID = #{subjectGroupId}
+		</if>
+		<if test="subjectGroupIds != null and subjectGroupIds != ''">
+			and SGA.SUBJECT_GROUP_ID in
+			<foreach collection="subjectGroupIds" open="(" close=")" item="item" separator=",">
+				#{item}
+			</foreach>
+		</if>
+		<if test="state != null and state != ''">
+			and SGA.STATE = #{state}
+		</if>
+		<if test="role != null and role != ''">
+			and SGA.ROLE = #{role}
+		</if>
+		<if test="userId != null and userId != ''">
+			and SGA.USER_ID = #{userId}
+		</if>
+	</select>
+	<insert id="insert" parameterType="com.haoyu.tip.subjectgroup.entity.SubjectGroupAuthorize">
+		insert into SUBJECT_GROUP_AUTHORIZE
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				ID,
+			</if>
+			<if test="subjectGroupId != null">
+				SUBJECT_GROUP_ID,
+			</if>
+			<if test="user != null">
+				USER_ID,
+			</if>
+			<if test="state != null">
+				STATE,
+			</if>
+			<if test="role != null">
+				ROLE,
+			</if>
+			<if test="creator != null and creator.id != null">
+				CREATOR,
+			</if>
+			<if test="createTime != null and createTime > 0">
+				CREATE_TIME,
+			</if>
+			<if test="updatedby != null and updatedby.id != null">
+				UPDATEDBY,
+			</if>
+			<if test="updateTime != null and updateTime > 0">
+				UPDATE_TIME,
+			</if>
+			<if test="isDeleted != null">
+				IS_DELETED,
+			</if>
+			<if test="version != null">
+				VERSION,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=VARCHAR},
+			</if>
+			<if test="subjectGroupId != null">
+				#{subjectGroupId,jdbcType=VARCHAR},
+			</if>
+			<if test="user != null">
+				#{user.id,jdbcType=VARCHAR},
+			</if>
+			<if test="state != null">
+				#{state,jdbcType=VARCHAR},
+			</if>
+			<if test="role != null">
+				#{role,jdbcType=VARCHAR},
+			</if>
+			<if test="creator != null and creator.id != null">
+				#{creator.id,jdbcType=VARCHAR},
+			</if>
+			<if test="createTime != null and createTime > 0">
+				#{createTime,jdbcType=DECIMAL},
+			</if>
+			<if test="updatedby != null and updatedby.id != null">
+				#{updatedby.id,jdbcType=VARCHAR},
+			</if>
+			<if test="updateTime != null and updateTime > 0">
+				#{updateTime,jdbcType=DECIMAL},
+			</if>
+			<if test="isDeleted != null">
+				#{isDeleted,jdbcType=CHAR},
+			</if>
+			<if test="version != null">
+				#{version,jdbcType=DECIMAL},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKey" parameterType="com.haoyu.tip.subjectgroup.entity.SubjectGroupAuthorize">
+		update SUBJECT_GROUP_AUTHORIZE
+		<set>
+			<if test="subjectGroupId != null">
+				SUBJECT_GROUP_ID = #{subjectGroupId,jdbcType=VARCHAR},
+			</if>
+			<if test="user != null">
+				USER_ID = #{user.id,jdbcType=VARCHAR},
+			</if>
+			<if test="state != null">
+				STATE = #{state,jdbcType=VARCHAR},
+			</if>
+			<if test="role != null">
+				ROLE = #{role,jdbcType=VARCHAR},
+			</if>
+			<if test="updatedby != null and updatedby.id != null">
+				UPDATEDBY = #{updatedby.id,jdbcType=VARCHAR},
+			</if>
+			<if test="updateTime != null">
+				UPDATE_TIME = #{updateTime,jdbcType=INTEGER},
+			</if>
+			<if test="isDeleted != null">
+				IS_DELETED = #{isDeleted,jdbcType=CHAR},
+			</if>
+		</set>
+		,VERSION = VERSION + 1
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<update id="deleteByLogic" parameterType="com.haoyu.tip.subjectgroup.entity.SubjectGroupAuthorize">
+		update SUBJECT_GROUP_AUTHORIZE
+		set IS_DELETED = 'Y', UPDATE_TIME = #{updateTime,jdbcType=INTEGER}
+		<if test="updatedby != null and updatedby.id != null and updatedby.id != ''">
+			,UPDATEDBY = #{updatedby.id,jdbcType=VARCHAR}
+		</if>
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<delete id="deleteByPhysics" parameterType="com.haoyu.tip.subjectgroup.entity.SubjectGroupAuthorize">
+		delete from SUBJECT_GROUP_AUTHORIZE
+		<trim prefix="where" prefixOverrides="and">
+			<if test="subjectGroupId != null and subjectGroupId != ''">
+				and SUBJECT_GROUP_ID = #{subjectGroupId}
+			</if>
+			<if test="role != null and role != ''">
+				and ROLE = #{role}
+			</if>
+			<if test="id != null and id != ''">
+				and ID = #{id}
+			</if>
+		</trim>
+	</delete>
+	<insert id="insertByIds" parameterType="map">
+		insert into SUBJECT_GROUP_AUTHORIZE(ID, SUBJECT_GROUP_ID, USER_ID, ROLE, STATE, CREATOR, CREATE_TIME, IS_DELETED, VERSION)
+		select ${subjectGroupAuthorize.id}, #{subjectGroupAuthorize.subjectGroupId, jdbcType=VARCHAR}, ID, #{subjectGroupAuthorize.role, jdbcType=VARCHAR}, 
+		#{subjectGroupAuthorize.state, jdbcType=VARCHAR}, #{subjectGroupAuthorize.creator.id, jdbcType=VARCHAR}, 
+		#{subjectGroupAuthorize.createTime, jdbcType=DECIMAL}, #{subjectGroupAuthorize.isDeleted, jdbcType=VARCHAR},
+		#{subjectGroupAuthorize.version, jdbcType=DECIMAL}
+		from BASE_USER_VIEW 
+		where ID in 
+		<foreach collection="ids" open="(" close=")" separator="," item="item">
+			#{item}
+		</foreach>
+	</insert>
+	<insert id="insertBySubjectGroupIds" parameterType="map">
+		insert into SUBJECT_GROUP_AUTHORIZE(ID, SUBJECT_GROUP_ID, USER_ID, ROLE, STATE, CREATOR, CREATE_TIME, IS_DELETED, VERSION)
+		select ${subjectGroupAuthorize.id}, ID, ${subjectGroupAuthorize.user.id}, #{subjectGroupAuthorize.role, jdbcType=VARCHAR}, 
+		#{subjectGroupAuthorize.state, jdbcType=VARCHAR}, #{subjectGroupAuthorize.creator.id, jdbcType=VARCHAR}, #{subjectGroupAuthorize.createTime, jdbcType=DECIMAL}, 
+		#{subjectGroupAuthorize.isDeleted, jdbcType=VARCHAR},#{subjectGroupAuthorize.version, jdbcType=DECIMAL}
+		from SUBJECT_GROUP 
+		where ID in 
+		<foreach collection="ids" open="(" close=")" separator="," item="item">
+			#{item}
+		</foreach>
+	</insert>
+	<update id="updateToMember" parameterType="com.haoyu.tip.subjectgroup.entity.SubjectGroupAuthorize">
+		update SUBJECT_GROUP_AUTHORIZE
+		set ROLE = 'member', UPDATE_TIME = #{updateTime, jdbcType=DECIMAL}
+		<if test="updatedby != null and updatedby != ''">
+			,updatedby = #{updatedby}
+		</if>
+		where IS_DELETED = 'N'
+		and ROLE = 'master'
+		and STATE = 'pass'
+		<if test="subjectGroupId != null and subjectGroupId != ''">
+			and SUBJECT_GROUP_ID = #{subjectGroupId}
+		</if>
+	</update>
+	<update id="updateByIds" parameterType="map">
+		update SUBJECT_GROUP_AUTHORIZE set
+			<if test="entity.state != null">
+				STATE = #{entity.state, jdbcType=VARCHAR},
+			</if>
+			<if test="entity.role != null">
+				ROLE = #{entity.role, jdbcType=VARCHAR},
+			</if>
+			<if test="entity.updatedby != null">
+				UPDATEDBY = #{entity.updatedby.id, jdbcType=VARCHAR}, 
+			</if>
+			<if test="entity.updateTime != null and entity.updateTime > 0">
+				UPDATE_TIME = #{entity.updateTime, jdbcType=DECIMAL}, 
+			</if>
+		VERSION = VERSION + 1
+		where ID in 
+		<foreach collection="ids" open="(" close=")" separator="," item="item">
+			#{item}
+		</foreach>
+	</update>
+	<select id="selectMemberUser" parameterType="map" resultMap="UserResultMap">
+		select BUV.ID, BUV.REAL_NAME
+		from SUBJECT_GROUP_AUTHORIZE SGA
+		join BASE_USER_VIEW BUV
+		on BUV.ID = SGA.USER_ID
+		where SGA.IS_DELETED = 'N'
+		<if test="subjectGroupId != null and subjectGroupId != ''">
+			and SGA.SUBJECT_GROUP_ID = #{subjectGroupId}
+		</if>
+		<if test="role != null and role != ''">
+			and SGA.ROLE = #{role}
+		</if>
+		<if test="realName != null and realName != ''">
+			and BUV.REAL_NAME like '%${realName}%'
+		</if>
+	</select>
+	<delete id="deleteByUserId" parameterType="com.haoyu.tip.subjectgroup.entity.SubjectGroupAuthorize">
+		delete from SUBJECT_GROUP_AUTHORIZE
+		where USER_ID = #{user.id, jdbcType=VARCHAR}
+		and ROLE = #{role, jdbcType=VARCHAR}
+	</delete>
+</mapper>

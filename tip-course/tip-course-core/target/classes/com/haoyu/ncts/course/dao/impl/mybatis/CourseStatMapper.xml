@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.haoyu.ncts.course.dao.impl.mybatis.CourseStatMapper">
+	<resultMap id="BaseResultMap" type="com.haoyu.ncts.course.entity.CourseStat">
+		<id column="COURSE_ID" property="course.id" jdbcType="VARCHAR" />
+		<result column="COURSE_TITLE" property="course.title" jdbcType="VARCHAR" />
+		<result column="COURSE_TYPE" property="course.type" jdbcType="VARCHAR" />
+		<result column="START_TIME" property="course.timePeriod.startTime" jdbcType="TIMESTAMP" />
+		<result column="END_TIME" property="course.timePeriod.endTime" jdbcType="TIMESTAMP" />
+		<result column="CODE" property="course.code" jdbcType="VARCHAR" />
+		<result column="TERM_NO" property="course.termNo" jdbcType="VARCHAR" />
+		<result column="RELATION_ID" property="course.courseRelation.relation.id" jdbcType="VARCHAR" />
+		<result column="STUDY_HOURS" property="course.studyHours" jdbcType="DECIMAL"/>
+		<!--课程内容统计 -->
+		<result column="FAQ_QUESTION_NUM" property="faqQuestionNum" jdbcType="INTEGER" />
+		<result column="FAQ_ANSWER_NUM" property="faqAnswerNum" jdbcType="INTEGER" />
+		<result column="NOTE_NUM" property="noteNum" jdbcType="INTEGER" />
+		<result column="RESOURCE_NUM" property="resourceNum" jdbcType="INTEGER" />
+		<result column="DISCUSSION_NUM" property="discussionNum" jdbcType="INTEGER" />
+		
+		<!-- 课程活动数量 -->
+		<result column="ACTIVITY_VIDEO_NUM" property="activityVideoNum" jdbcType="INTEGER"/>
+		<result column="ACTIVITY_DISCUSSION_NUM" property="activityDiscussionNum" jdbcType="INTEGER"/>
+		<result column="ACTIVITY_TEST_NUM" property="activityTestNum" jdbcType="INTEGER"/>
+		<result column="ACTIVITY_ASSIGNMENT_NUM" property="activityAssignmentNum" jdbcType="INTEGER"/>
+		<result column="ACTIVITY_HTML_NUM" property="activityHtmlNum" jdbcType="INTEGER"/>
+		<result column="ACTIVITY_SURVEY_NUM" property="activitySurveyNum" jdbcType="INTEGER"/>
+		
+		<!-- 课程活动完成人数统计 -->
+		<result column="COMPLETE_VIDEO_NUM" property="completeVideoNum" jdbcType="INTEGER" />
+		<result column="COMPLETE_DISCUSSION_NUM" property="completeDiscussionNum" jdbcType="INTEGER" />
+		<result column="COMPLETE_TEST_NUM" property="completeTestNum" jdbcType="INTEGER" />
+		<result column="COMPLETE_ASSIGNMENT_NUM" property="completeAssignmentNum" jdbcType="INTEGER" />
+		<result column="COMPLETE_HTML_NUM" property="completeHtmlNum" jdbcType="INTEGER"  />
+		<result column="COMPLETE_SURVEY_NUM" property="completeSurveyNum" jdbcType="INTEGER" />
+
+		<result column="REGISTER_NUM" property="registerNum" jdbcType="INTEGER" />
+		<result column="QUALIFIED_NUM" property="qualifiedNum" jdbcType="INTEGER" />
+	</resultMap>
+
+	<select id="select" parameterType="map" resultMap="BaseResultMap">
+		select C.ID COURSE_ID, C.TITLE COURSE_TITLE, C.TYPE COURSE_TYPE,C.CREATE_TIME,C.START_TIME,C.END_TIME,C.CODE,C.TERM_NO,C.STUDY_HOURS
+		,CR.RELATION_ID
+		<!--课程内容统计 -->
+		,(select count(FQ.ID) from FAQ_QUESTION FQ where FQ.IS_DELETED = 'N' and FQ.RELATION_ID = C.ID) as FAQ_QUESTION_NUM
+		,(select count(FA.ID) from FAQ_ANSWER FA join FAQ_QUESTION FQ on FQ.ID = FA.QUESTION_ID and FA.IS_DELETED = 'N' and FQ.IS_DELETED = 'N' where FQ.RELATION_ID = C.ID) as FAQ_ANSWER_NUM
+		,(select count(N.ID) from NOTE N where N.IS_DELETED = 'N' and N.RELATION_ID in (select ID from SECTION where IS_DELETED='N' and COURSE_ID = C.ID)) as NOTE_NUM
+		,(select count(R.ID) from RESOURCES R join RESOURCE_RELATION RR on R.ID = RR.RESOURCE_ID and R.IS_DELETED = 'N' where RR.RELATION_ID in(select ID from SECTION where IS_DELETED='N' and COURSE_ID = C.ID)) as RESOURCE_NUM
+		,(select count(D.ID) from DISCUSSION D join DISCUSSION_RELATION DR on DR.DISCUSSION_ID = D.ID where D.IS_DELETED = 'N' and DR.RELATION_ID = C.ID) as DISCUSSION_NUM
+		<!-- 课程活动数量 -->
+		,(select count(A.ID) from ACTIVITY A where A.IS_DELETED = 'N' and A.RELATION_ID in (select S.ID from SECTION S where S.IS_DELETED = 'N' and S.COURSE_ID = C.ID) and A.TYPE = 'video' ) ACTIVITY_VIDEO_NUM
+		,(select count(A.ID) from ACTIVITY A where A.IS_DELETED = 'N' and A.RELATION_ID in (select S.ID from SECTION S where S.IS_DELETED = 'N' and S.COURSE_ID = C.ID) and A.TYPE = 'discussion' ) ACTIVITY_DISCUSSION_NUM
+		,(select count(A.ID) from ACTIVITY A where A.IS_DELETED = 'N' and A.RELATION_ID in (select S.ID from SECTION S where S.IS_DELETED = 'N' and S.COURSE_ID = C.ID) and A.TYPE = 'test' ) ACTIVITY_TEST_NUM
+		,(select count(A.ID) from ACTIVITY A where A.IS_DELETED = 'N' and A.RELATION_ID in (select S.ID from SECTION S where S.IS_DELETED = 'N' and S.COURSE_ID = C.ID) and A.TYPE = 'assignment' ) ACTIVITY_ASSIGNMENT_NUM
+		,(select count(A.ID) from ACTIVITY A where A.IS_DELETED = 'N' and A.RELATION_ID in (select S.ID from SECTION S where S.IS_DELETED = 'N' and S.COURSE_ID = C.ID) and A.TYPE = 'html' ) ACTIVITY_HTML_NUM
+		,(select count(A.ID) from ACTIVITY A where A.IS_DELETED = 'N' and A.RELATION_ID in (select S.ID from SECTION S where S.IS_DELETED = 'N' and S.COURSE_ID = C.ID) and A.TYPE = 'survey' ) ACTIVITY_SURVEY_NUM
+		<!-- 课程活动完成人数统计 -->
+		,(select count(AR.ID) from ACTIVITY_RESULT AR join ACTIVITY A on A.ID = AR.ACTIVITY_ID and A.IS_DELETED = 'N' and AR.IS_DELETED = 'N' and A.TYPE='video' where AR.RELATION_ID = C.ID and AR.STATE = 'complete' ) COMPLETE_VIDEO_NUM
+		,(select count(AR.ID) from ACTIVITY_RESULT AR join ACTIVITY A on A.ID = AR.ACTIVITY_ID and A.IS_DELETED = 'N' and AR.IS_DELETED = 'N' and A.TYPE='discussion' where AR.RELATION_ID = C.ID and AR.STATE = 'complete' ) COMPLETE_DISCUSSION_NUM
+		,(select count(AR.ID) from ACTIVITY_RESULT AR join ACTIVITY A on A.ID = AR.ACTIVITY_ID and A.IS_DELETED = 'N' and AR.IS_DELETED = 'N' and A.TYPE='test' where AR.RELATION_ID = C.ID and AR.STATE = 'complete' ) COMPLETE_TEST_NUM
+		,(select count(AR.ID) from ACTIVITY_RESULT AR join ACTIVITY A on A.ID = AR.ACTIVITY_ID and A.IS_DELETED = 'N' and AR.IS_DELETED = 'N' and A.TYPE='assignment' where AR.RELATION_ID = C.ID and AR.STATE = 'complete' ) COMPLETE_ASSIGNMENT_NUM
+		,(select count(AR.ID) from ACTIVITY_RESULT AR join ACTIVITY A on A.ID = AR.ACTIVITY_ID and A.IS_DELETED = 'N' and AR.IS_DELETED = 'N' and A.TYPE='html' where AR.RELATION_ID = C.ID and AR.STATE = 'complete' ) COMPLETE_HTML_NUM
+		,(select count(AR.ID) from ACTIVITY_RESULT AR join ACTIVITY A on A.ID = AR.ACTIVITY_ID and A.IS_DELETED = 'N' and AR.IS_DELETED = 'N' and A.TYPE='survey' where AR.RELATION_ID = C.ID and AR.STATE = 'complete' ) COMPLETE_SURVEY_NUM
+		
+		,(select count(CR.ID) from COURSE_REGISTER CR where CR.IS_DELETED = 'N' and CR.COURSE_ID = C.ID and CR.STATE='pass') as REGISTER_NUM
+		,(select count(CRE.ID) from COURSE_RESULT CRE where CRE.IS_DELETED = 'N' and CRE.COURSE_ID = C.ID and CRE.STATE = 'pass') QUALIFIED_NUM
+		from COURSE C
+		join COURSE_RELATION CR on C.ID = CR.COURSE_ID
+		where C.IS_DELETED = 'N'
+		<if test="courseId != null and courseId != ''">
+			and C.ID = #{courseId,jdbcType=VARCHAR}
+		</if>
+		<if test="state != null and state != ''">
+			and C.STATE = #{state,jdbcType=VARCHAR}
+		</if>
+		<if test="isTemplate != null and isTemplate != ''">
+			and C.IS_TEMPLATE = #{isTemplate,jdbcType=VARCHAR}
+		</if>
+	</select>
+</mapper>

@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.haoyu.tip.faq.dao.impl.mybatis.FaqAnswerMapper">
+	<resultMap id="BaseResultMap" type="com.haoyu.tip.faq.entity.FaqAnswer">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="QUESTION_ID" property="questionId" jdbcType="VARCHAR" />
+		<result column="CONTENT" property="content" jdbcType="VARCHAR" />
+		<result column="CREATE_TIME" property="createTime" jdbcType="INTEGER" />
+		<result column="CREATOR" property="creator.id" jdbcType="VARCHAR" />
+		<result column="REAL_NAME" property="creator.realName" jdbcType="VARCHAR" />	
+		<result column="AVATAR" property="creator.avatar" jdbcType="VARCHAR" />	
+	</resultMap>
+	<sql id="Base_Column_List">
+		ID, CONTENT,QUESTION_ID, CREATE_TIME, CREATOR
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from FAQ_ANSWER
+		where ID = #{id,jdbcType=VARCHAR}
+	</select>
+	<select id="select" resultMap="BaseResultMap" parameterType="java.util.Map">
+		select
+			FA.ID,
+			FA.CONTENT,
+			FA.QUESTION_ID,
+			FA.CREATE_TIME,
+			BUV.ID CREATOR,
+			BUV.REAL_NAME REAL_NAME,
+			BUV.AVATAR AVATAR
+		from FAQ_ANSWER FA
+		inner join BASE_USER_VIEW BUV on BUV.ID = FA.CREATOR
+		where FA.IS_DELETED = 'N'
+		<if test="faqQuestionids != null">
+		and FA.QUESTION_ID in
+			<foreach collection="faqQuestionids" open="(" close=")" separator="," item="qid">
+				#{qid,jdbcType=VARCHAR}
+			</foreach>
+		</if>
+	</select>
+	<insert id="insert" parameterType="com.haoyu.tip.faq.entity.FaqAnswer">
+		insert into FAQ_ANSWER
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				ID,
+			</if>
+			<if test="content != null">
+				CONTENT,
+			</if>
+			<if test="questionId != null">
+				QUESTION_ID,
+			</if>
+			<if test="creator != null">
+				CREATOR,
+			</if>
+			<if test="createTime != null">
+				CREATE_TIME,
+			</if>
+			<if test="updatedby != null">
+				UPDATEDBY,
+			</if>
+			<if test="updateTime != null">
+				UPDATE_TIME,
+			</if>
+			<if test="version != null">
+				VERSION,
+			</if>
+			<if test="isDeleted != null">
+				IS_DELETED,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=VARCHAR},
+			</if>
+			<if test="content != null">
+				#{content,jdbcType=VARCHAR},
+			</if>
+			<if test="questionId != null">
+				#{questionId,jdbcType=VARCHAR},
+			</if>
+			<if test="creator != null">
+				#{creator.id,jdbcType=VARCHAR},
+			</if>
+			<if test="createTime != null">
+				#{createTime,jdbcType=INTEGER},
+			</if>
+			<if test="updatedby != null">
+				#{updatedby.id,jdbcType=VARCHAR},
+			</if>
+			<if test="updateTime != null">
+				#{updateTime,jdbcType=INTEGER},
+			</if>
+			<if test="version != null">
+				#{version,jdbcType=DECIMAL},
+			</if>
+			<if test="isDeleted != null">
+				#{isDeleted,jdbcType=CHAR},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKey" parameterType="com.haoyu.tip.faq.entity.FaqAnswer">
+		update FAQ_ANSWER
+		<set>
+			<if test="content != null">
+				CONTENT = #{content,jdbcType=VARCHAR},
+			</if>
+			<if test="questionId != null">
+				QUESTION_ID = #{questionId,jdbcType=VARCHAR},
+			</if>
+			<if test="creator != null and creator.id != null and creator.id != ''">
+				CREATOR = #{creator.id,jdbcType=VARCHAR},
+			</if>
+			<if test="createTime != null createTime > 0">
+				CREATE_TIME = #{createTime,jdbcType=INTEGER},
+			</if>
+			<if test="updatedby != null">
+				UPDATEDBY = #{updatedby.id,jdbcType=VARCHAR},
+			</if>
+			<if test="updateTime != null">
+				UPDATE_TIME = #{updateTime,jdbcType=INTEGER},
+			</if>
+			<if test="isDeleted != null">
+				IS_DELETED = #{isDeleted,jdbcType=CHAR},
+			</if>
+		</set>
+		,VERSION = VERSION + 1
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<update id="deleteByLogic" parameterType="com.haoyu.tip.faq.entity.FaqAnswer">
+		update FAQ_ANSWER
+		set IS_DELETED = 'Y', UPDATE_TIME = #{updateTime,jdbcType=INTEGER}
+		<if test="updatedby != null">
+			,UPDATEDBY = #{updatedby.id,jdbcType=VARCHAR}
+		</if>
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<select id="count" parameterType="com.haoyu.tip.faq.entity.FaqAnswer" resultType="int">
+		select
+			count(FA.ID)
+		from
+			FAQ_ANSWER FA
+		where
+			FA.IS_DELETED = 'N'
+		<if test="questionId != null and questionId != ''">
+			and FA.QUESTION_ID = #{questionId,jdbcType=VARCHAR}
+		</if>
+	</select>
+</mapper>

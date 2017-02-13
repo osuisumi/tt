@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.haoyu.tip.workshop.dao.impl.mybatis.WorkshopAuthorizeMapper">
+	<resultMap id="BaseResultMap" type="com.haoyu.tip.workshop.entity.WorkshopAuthorize">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="WORKSHOP_ID" property="workshop.id" jdbcType="VARCHAR" />
+		<result column="ROLE" property="role" jdbcType="VARCHAR" />
+		<result column="STATE" property="state" jdbcType="INTEGER" />
+		<result column="CREATE_TIME" property="createTime" jdbcType="INTEGER" />
+		<result column="USER_ID" property="user.id" jdbcType="VARCHAR" />
+		<result column="REAL_NAME" property="user.realName" jdbcType="VARCHAR" />
+		<result column="AVATAR" property="user.avatar" jdbcType="VARCHAR" />
+	</resultMap>
+	<sql id="selectColumnSQL" >
+		select WSA.ID, WSA.ROLE, WSA.STATE, WSA.CREATE_TIME
+		,BUV.ID USER_ID,BUV.REAL_NAME,BUV.AVATAR
+		,WS.ID WORKSHOP_ID
+		from WORKSHOP_AUTHORIZE WSA
+		join WORKSHOP WS
+		on WS.ID = WSA.WORKSHOP_ID
+		and WS.IS_DELETED = 'N'
+		join BASE_USER_VIEW BUV
+		on BUV.ID = WSA.USER_ID
+	</sql>
+	<sql id="Base_Column_List">
+		ID, WORKSHOP_ID, USER_ID, ROLE, STATE, CREATE_TIME
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String">
+		select 
+		<include refid="Base_Column_List" />
+		from WORKSHOP_AUTHORIZE
+		where ID = #{id,jdbcType=VARCHAR}
+	</select>
+	<select id="select" resultMap="BaseResultMap" parameterType="map">
+		<include refid="selectColumnSQL" />
+		where WSA.IS_DELETED = 'N'
+		<if test="workshopId != null and workshopId != ''">
+			and WSA.WORKSHOP_ID = #{workshopId}
+		</if>
+		<if test="role != null and role != ''">
+			and WSA.ROLE = #{role}
+		</if>
+		<if test="state != null and state != ''">
+			and WSA.STATE = #{state}
+		</if>
+		<if test="userId != null and userId != ''">
+			and WSA.USER_ID = #{userId}
+		</if>
+		<if test="realName != null and realName != ''">
+			and BUV.REAL_NAME like '%${realName}%'
+		</if>
+		<if test="workshopIds != null and workshopIds.size > 0">
+			and WSA.WORKSHOP_ID in 
+	  		<foreach collection="workshopIds" open="(" close=")" separator="," item="item">
+	  			#{item}
+	  		</foreach>
+		</if>
+	</select>
+	<insert id="insert" parameterType="com.haoyu.tip.workshop.entity.WorkshopAuthorize">
+		insert into WORKSHOP_AUTHORIZE
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				ID,
+			</if>
+			<if test="workshop != null and workshop.id != null">
+				WORKSHOP_ID,
+			</if>
+			<if test="user != null and user.id != null">
+				USER_ID,
+			</if>
+			<if test="role != null">
+				ROLE,
+			</if>
+			<if test="state != null">
+				STATE,
+			</if>
+			<if test="creator != null and creator.id != null">
+				CREATOR,
+			</if>
+			<if test="createTime != null and createTime > 0">
+				CREATE_TIME,
+			</if>
+			<if test="updatedby != null and updatedby.id != null">
+				UPDATEDBY,
+			</if>
+			<if test="updateTime != null and updateTime > 0">
+				UPDATE_TIME,
+			</if>
+			<if test="version != null">
+				VERSION,
+			</if>
+			<if test="isDeleted != null">
+				IS_DELETED,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=VARCHAR},
+			</if>
+			<if test="workshop != null and workshop.id != null">
+				#{workshop.id,jdbcType=VARCHAR},
+			</if>
+			<if test="user != null and user.id != null">
+				#{user.id,jdbcType=VARCHAR},
+			</if>
+			<if test="role != null">
+				#{role,jdbcType=VARCHAR},
+			</if>
+			<if test="state != null">
+				#{state,jdbcType=VARCHAR},
+			</if>
+			<if test="creator != null and creator.id != null">
+				#{creator.id,jdbcType=VARCHAR},
+			</if>
+			<if test="createTime != null and createTime > 0">
+				#{createTime,jdbcType=INTEGER},
+			</if>
+			<if test="updatedby != null and updatedby.id != null">
+				#{updatedby.id,jdbcType=VARCHAR},
+			</if>
+			<if test="updateTime != null and updateTime > 0">
+				#{updateTime,jdbcType=INTEGER},
+			</if>
+			<if test="version != null">
+				#{version,jdbcType=DECIMAL},
+			</if>
+			<if test="isDeleted != null">
+				#{isDeleted,jdbcType=CHAR},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKey" parameterType="com.haoyu.tip.workshop.entity.WorkshopAuthorize">
+		update WORKSHOP_AUTHORIZE
+		<set>
+			<if test="workshop != null and workshop.id != null">
+				WORKSHOP_ID = #{workshop.id,jdbcType=VARCHAR},
+			</if>
+			<if test="user != null and user.id != null">
+				USER_ID = #{user.id,jdbcType=VARCHAR},
+			</if>
+			<if test="role != null">
+				ROLE = #{role,jdbcType=INTEGER},
+			</if>
+			<if test="state != null">
+				STATE = #{state,jdbcType=VARCHAR},
+			</if>
+			<if test="updatedby != null and updatedby.id != null">
+				UPDATEDBY = #{updatedby.id,jdbcType=VARCHAR},
+			</if>
+			<if test="updateTime != null and updateTime > 0">
+				UPDATE_TIME = #{updateTime,jdbcType=INTEGER},
+			</if>
+			<if test="version != null">
+				VERSION = #{version,jdbcType=DECIMAL},
+			</if>
+			<if test="isDeleted != null">
+				IS_DELETED = #{isDeleted,jdbcType=CHAR},
+			</if>
+		</set>
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<update id="deleteByLogic" parameterType="com.haoyu.tip.workshop.entity.WorkshopAuthorize">
+		update WORKSHOP_AUTHORIZE
+		set IS_DELETED = 'Y', UPDATE_TIME = #{updateTime,jdbcType=INTEGER}
+		<if test="updatedby != null and updatedby.id != null">
+			,UPDATEDBY = #{updatedby.id,jdbcType=VARCHAR}
+		</if>
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<insert id="insertByIds" parameterType="map">
+		insert into WORKSHOP_AUTHORIZE(ID, WORKSHOP_ID, USER_ID, ROLE,STATE, CREATE_TIME, CREATOR, IS_DELETED, VERSION)
+		select ${workshopAuthorize.id},#{workshopAuthorize.workshop.id, jdbcType=VARCHAR},ID,#{workshopAuthorize.role, jdbcType=VARCHAR},#{workshopAuthorize.state, jdbcType=VARCHAR},#{workshopAuthorize.createTime,jdbcType=INTEGER},
+		#{workshopAuthorize.creator.id, jdbcType=VARCHAR},#{workshopAuthorize.isDeleted, jdbcType=VARCHAR},#{workshopAuthorize.version,jdbcType=INTEGER}
+		from BASE_USER_VIEW 
+		where ID in 
+		<foreach collection="ids" open="(" close=")" separator="," item="item">
+			#{item}
+		</foreach>
+	</insert>
+	<select id="selectWorkshopAuthorizeForMap" resultMap="BaseResultMap" parameterType="String">
+		select <include refid="Base_Column_List"/>
+		from WORKSHOP_AUTHORIZE 
+		where WORKSHOP_ID = #{workshop.id, jdbcType=VARCHAR}
+		and IS_DELETED = 'N'
+	</select>
+	<update id="updateByIds" parameterType="map">
+		update WORKSHOP_AUTHORIZE set
+			<if test="entity.state != null and entity.state != ''">
+				STATE = #{entity.state, jdbcType=VARCHAR},
+			</if>
+			<if test="entity.role != null and entity.role != ''">
+				ROLE = #{entity.role, jdbcType=VARCHAR},
+			</if>
+			<if test="entity.updatedby != null and entity.updatedby != ''">
+				UPDATEDBY = #{entity.updatedby.id, jdbcType=VARCHAR}, 
+			</if>
+			<if test="entity.updateTime != null and entity.updateTime > 0">
+				UPDATE_TIME = #{entity.updateTime, jdbcType=DECIMAL}, 
+			</if>
+		VERSION = VERSION + 1
+		where ID in 
+		<foreach collection="ids" open="(" close=")" separator="," item="item">
+			#{item}
+		</foreach>
+	</update>
+	<delete id="deleteByPhysics" parameterType="com.haoyu.tip.workshop.entity.WorkshopAuthorize">
+		delete from WORKSHOP_AUTHORIZE
+		<trim prefix="where" prefixOverrides="and">
+			<if test="workshop != null and workshop.id != ''">
+				and WORKSHOP_ID = #{workshop.id}
+			</if>
+			<if test="role != null and role != ''">
+				and ROLE = #{role}
+			</if>
+			<if test="id != null and id != ''">
+				and ID = #{id}
+			</if>
+		</trim>
+	</delete>
+	<delete id="deleteByIds" >
+		delete from WORKSHOP_AUTHORIZE
+		where ID in 
+		<foreach collection="list" open="(" close=")" separator="," item="item">
+			#{item}		
+		</foreach>
+	</delete>
+</mapper>

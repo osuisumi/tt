@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.haoyu.tip.announcement.dao.impl.mybatis.AnnouncementMapper">
+	<resultMap id="BaseResultMap" type="com.haoyu.tip.announcement.entity.Announcement">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="TITLE" property="title" jdbcType="VARCHAR" />
+		<result column="CONTENT" property="content" jdbcType="VARCHAR" />
+		<result column="TYPE" property="type" jdbcType="VARCHAR" />
+		<result column="STATE" property="state" jdbcType="VARCHAR" />
+		<result column="PUBLISH_TIME" property="publishTime" jdbcType="TIMESTAMP" />
+		<result column="CREATE_TIME" property="createTime" jdbcType="INTEGER" />
+		<result column="CREATOR" property="creator.id" jdbcType="VARCHAR" />
+		<result column="REAL_NAME" property="creator.realName" jdbcType="VARCHAR" />	
+		<result column="AVATAR" property="creator.avatar" jdbcType="VARCHAR" />	
+		<result column="ANNOUNCEMENT_USER_ID" property="announcementUser.id" jdbcType="VARCHAR" />
+		<result column="IS_TOP" property="isTop" jdbcType="VARCHAR" />	
+		<collection property="announcementRelations" ofType="com.haoyu.tip.announcement.entity.AnnouncementRelation">
+			<id property="id" column="ANNOUNCEMENT_RELATION_ID" jdbcType="VARCHAR" />
+			<result property="browseNum" column="BROWSE_NUM" jdbcType="INTEGER"/>
+			<result property="relation.id" column="RELATION_ID" jdbcType="VARCHAR"/>
+			<result property="relation.type" column="RELATION_TYPE" jdbcType="VARCHAR"/>
+		</collection>
+	</resultMap>
+	<sql id="Base_Column_List">
+		ID, CONTENT,TITLE, CREATE_TIME, CREATOR, TYPE,STATE,PUBLISH_TIME,IS_TOP
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String">
+		select A.ID, A.CONTENT, A.TITLE, A.CREATE_TIME, A.CREATOR, A.TYPE,A.STATE,A.PUBLISH_TIME,
+		AR.ID ANNOUNCEMENT_RELATION_ID, AR.BROWSE_NUM, AR.RELATION_ID, AR.TYPE RELATION_TYPE,
+		A.IS_TOP,
+		(select BUV.REAL_NAME from BASE_USER_VIEW BUV where BUV.ID = A.CREATOR) REAL_NAME,
+		(select BUV.AVATAR from BASE_USER_VIEW BUV where BUV.ID = A.CREATOR) AVATAR
+		from ANNOUNCEMENT A
+		join ANNOUNCEMENT_RELATION AR
+		on AR.ANNOUNCEMENT_ID = A.ID
+		and AR.IS_DELETED = 'N'
+		where A.ID = #{id,jdbcType=VARCHAR}
+	</select>
+	<select id="select" resultMap="BaseResultMap" parameterType="map">
+		select
+			A.ID,
+			<choose>
+		    	<when test="getContent == false">
+		    	</when>
+		    	<otherwise>
+		    	    A.CONTENT,
+		    	</otherwise>
+		    </choose>
+			A.TITLE,
+			A.CREATE_TIME,
+			A.CREATOR,
+			A.TYPE,
+			A.STATE,
+			A.PUBLISH_TIME,
+			A.IS_TOP,
+			AR.ID ANNOUNCEMENT_RELATION_ID, AR.RELATION_ID, AR.BROWSE_NUM, AR.TYPE RELATION_TYPE,
+			(select BUV.REAL_NAME from BASE_USER_VIEW BUV where BUV.ID = A.CREATOR) REAL_NAME,
+			(select BUV.AVATAR from BASE_USER_VIEW BUV where BUV.ID = A.CREATOR) AVATAR
+		<if test="userId != null and userId != ''">
+			,AU.ID ANNOUNCEMENT_USER_ID
+		</if>
+		from ANNOUNCEMENT A
+		join ANNOUNCEMENT_RELATION AR on AR.ANNOUNCEMENT_ID = A.ID and AR.IS_DELETED = 'N'
+		<if test="userId != null and userId != ''">
+			left join ANNOUNCEMENT_USER AU
+			on AU.ANNOUNCEMENT_ID = A.ID
+			and AU.CREATOR = #{userId, jdbcType=VARCHAR}
+			and AU.IS_DELETED = 'N'
+		</if>
+		where A.IS_DELETED = 'N'
+		<if test="creator != null and creator != ''">
+			and A.CREATOR = #{creator}
+		</if>
+		<if test="type != null and type != ''">
+			and A.TYPE = #{type}
+		</if>
+		<if test="types != null and types != ''">
+			and #{types} like concat('%', concat(A.TYPE, '%'))
+		</if>
+		<if test="title != null and title != ''">
+			and A.TITLE like '%${title}%'
+		</if>
+		<if test="state != null and state != ''">
+			and A.STATE = #{state}
+		</if>
+		<if test="relationId != null and relationId != ''">
+			and AR.RELATION_ID = #{relationId,jdbcType=VARCHAR}
+		</if>
+		<if test="relationIds != null">
+			and exists (select 1 from ANNOUNCEMENT_RELATION where ANNOUNCEMENT_ID = A.ID and IS_DELETED = 'N' and RELATION_ID in
+			<foreach collection="relationIds" open="(" close=")"  separator="," item="item">
+				#{item}
+			</foreach>
+			)
+		</if>
+		<if test="relationIdArray != null and relationIdArray != ''">
+			and exists (select 1 from ANNOUNCEMENT_RELATION where ANNOUNCEMENT_ID = A.ID and IS_DELETED = 'N' and #{relationIdArray} like concat(concat('%',RELATION_ID), '%'))
+		</if>
+		<if test="relationType != null and relationType != ''">
+			and exists (select 1 from ANNOUNCEMENT_RELATION where ANNOUNCEMENT_ID = A.ID and IS_DELETED = 'N' and TYPE = #{relationType, jdbcType=VARCHAR})
+		</if>
+		<if test="relationIdOrSystem != null and relationIdOrSystem != ''">
+			and exists (select 1 from ANNOUNCEMENT_RELATION where ANNOUNCEMENT_ID = A.ID and IS_DELETED = 'N' and (RELATION_ID = #{relationIdOrSystem} or TYPE = 'system'))
+		</if>
+	</select>
+	<insert id="insert" parameterType="com.haoyu.tip.announcement.entity.Announcement">
+		insert into ANNOUNCEMENT
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				ID,
+			</if>
+			<if test="content != null">
+				CONTENT,
+			</if>
+			<if test="title != null">
+				TITLE,
+			</if>
+			<if test="type != null">
+				TYPE,
+			</if>
+			<if test="creator != null">
+				CREATOR,
+			</if>
+			<if test="createTime != null">
+				CREATE_TIME,
+			</if>
+			<if test="updatedby != null">
+				UPDATEDBY,
+			</if>
+			<if test="updateTime != null">
+				UPDATE_TIME,
+			</if>
+			<if test="version != null">
+				VERSION,
+			</if>
+			<if test="isDeleted != null">
+				IS_DELETED,
+			</if>
+			<if test="state != null">
+				STATE,
+			</if>
+			<if test="publishTime != null">
+				PUBLISH_TIME,
+			</if>
+			<if test="isTop != null">
+				IS_TOP,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=VARCHAR},
+			</if>
+			<if test="content != null">
+				#{content,jdbcType=VARCHAR},
+			</if>
+			<if test="title != null">
+				#{title,jdbcType=VARCHAR},
+			</if>
+			<if test="type != null">
+				#{type,jdbcType=VARCHAR},
+			</if>
+			<if test="creator != null">
+				#{creator.id,jdbcType=VARCHAR},
+			</if>
+			<if test="createTime != null and createTime > 0">
+				#{createTime,jdbcType=INTEGER},
+			</if>
+			<if test="updatedby != null">
+				#{updatedby.id,jdbcType=VARCHAR},
+			</if>
+			<if test="updateTime != null and updateTime > 0">
+				#{updateTime,jdbcType=INTEGER},
+			</if>
+			<if test="version != null">
+				#{version,jdbcType=DECIMAL},
+			</if>
+			<if test="isDeleted != null">
+				#{isDeleted,jdbcType=CHAR},
+			</if>		
+			<if test="state != null">
+				#{state,jdbcType=VARCHAR},
+			</if>			
+			<if test="publishTime != null">
+				#{publishTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="isTop != null">
+				#{isTop,jdbcType=CHAR},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKey" parameterType="com.haoyu.tip.announcement.entity.Announcement">
+		update ANNOUNCEMENT
+		<set>
+			<if test="content != null and content != '' ">
+				CONTENT = #{content,jdbcType=VARCHAR},
+			</if>
+			<if test="title != null and title != '' ">
+				TITLE = #{title,jdbcType=VARCHAR},
+			</if>
+			<if test="type != null and type  != '' ">
+				TYPE = #{type,jdbcType=VARCHAR},
+			</if>
+			<if test="updatedby != null and  updatedby != '' ">
+				UPDATEDBY = #{updatedby.id,jdbcType=VARCHAR},
+			</if>
+			<if test="updateTime != null and updateTime > 0">
+				UPDATE_TIME = #{updateTime,jdbcType=INTEGER},
+			</if>
+			<if test="isDeleted != null and isDeleted != '' ">
+				IS_DELETED = #{isDeleted,jdbcType=CHAR},
+			</if>
+			<if test="state != null and state != '' ">
+				STATE = #{state,jdbcType=VARCHAR},
+			</if>
+			<if test="publishTime != null and publishTime != '' ">
+				PUBLISH_TIME = #{publishTime,jdbcType=CHAR},
+			</if>
+			<if test="isTop != null and isTop != '' ">
+				IS_TOP = #{isTop,jdbcType=CHAR},
+			</if>
+		</set>
+		,VERSION = VERSION + 1
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<update id="deleteByLogic" parameterType="com.haoyu.tip.announcement.entity.Announcement">
+		update ANNOUNCEMENT
+		set IS_DELETED = 'Y', UPDATE_TIME = #{updateTime,jdbcType=INTEGER}
+		<if test="updatedby != null">
+			,UPDATEDBY = #{updatedby.id,jdbcType=VARCHAR}
+		</if>
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<update id="deleteByIds" parameterType="map">
+		update ANNOUNCEMENT
+		set IS_DELETED = 'Y', UPDATE_TIME = #{entity.updateTime,jdbcType=INTEGER}
+		<if test="updatedby != null">
+			,UPDATEDBY = #{entity.id,jdbcType=VARCHAR}
+		</if>
+		where ID in
+		<foreach collection="ids" open="(" close=")" separator="," item="item">
+			#{item}
+		</foreach>
+	</update>
+</mapper>

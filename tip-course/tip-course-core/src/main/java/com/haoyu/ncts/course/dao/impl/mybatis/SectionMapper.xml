@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.haoyu.ncts.course.dao.impl.mybatis.SectionMapper">
+	<resultMap id="BaseResultMap" type="com.haoyu.ncts.course.entity.Section">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="TITLE" property="title" jdbcType="VARCHAR" />
+		<result column="COURSE_ID" property="course.id" jdbcType="VARCHAR" />
+		<result column="PARENT_ID" property="parentSection.id" jdbcType="VARCHAR" />
+		<result column="START_TIME" property="timePeriod.startTime" jdbcType="TIMESTAMP" />
+		<result column="END_TIME" property="timePeriod.endTime" jdbcType="TIMESTAMP" />
+		<result column="IS_HIDDEN" property="isHidden" jdbcType="VARCHAR" />
+		<result column="SORT_NO" property="sortNo" jdbcType="INTEGER" />
+		<result column="CREATOR" property="creator.id" jdbcType="VARCHAR" />
+		<result column="CREATE_TIME" property="createTime" jdbcType="TIMESTAMP" />
+		<collection property="activities" ofType="com.haoyu.aip.activity.entity.Activity">
+			<id column="ID" property="id" jdbcType="VARCHAR" />
+			<result column="TITLE" property="title" jdbcType="VARCHAR" />
+			<result column="TYPE" property="type" jdbcType="VARCHAR" />
+		</collection>
+	</resultMap>
+	<sql id="BaseSelectSql">
+		select S.ID, S.TITLE, S.COURSE_ID, S.PARENT_ID, S.START_TIME, S.END_TIME, S.IS_HIDDEN, S.SORT_NO, S.CREATOR, S.CREATE_TIME
+		<!-- A.TITLE, A.ID, A.TYPE -->
+		from SECTION S
+		<!-- left join ACTIVITY A
+		on S.ID = A.RELATION_ID
+		and A.IS_DELETED = 'N' -->
+	</sql>
+	<sql id="BaseWhereSql">
+		<choose>
+			<when test="isDeleted != null and isDeleted != ''">
+				where S.IS_DELETED = #{isDeleted}
+			</when>
+			<otherwise>
+				where S.IS_DELETED = 'N'
+			</otherwise>
+		</choose>
+		<if test="title != null and title != ''">
+			and S.TITLE like '%${title}%'
+		</if>
+		<if test="courseId != null and courseId != ''">
+			and S.COURSE_ID = #{courseId}
+		</if>
+		<if test="parentId != null">
+			<choose>
+				<when test="parentId != ''">
+					and S.PARENT_ID = #{parentId}
+				</when>
+				<otherwise>
+					and (S.PARENT_ID is null or S.PARENT_ID = '') 
+				</otherwise>
+			</choose>
+		</if>
+		<if test="ids != null ">
+		    and S.ID in
+		    <foreach collection="ids" open="(" close=")" item="item" separator=",">
+				#{item}
+			</foreach>
+		</if>
+	</sql>
+	<select id="select" parameterType="map" resultMap="BaseResultMap">
+		<include refid="BaseSelectSql" />
+		<include refid="BaseWhereSql" />
+	</select>
+	<select id="selectByPrimaryKey" parameterType="string" resultMap="BaseResultMap">
+		<include refid="BaseSelectSql" /> 
+		where S.ID = #{id, jdbcType=VARCHAR}
+	</select>
+	<insert id="insert" parameterType="com.haoyu.ncts.course.entity.Section">
+		insert into SECTION
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				ID,
+			</if>
+			<if test="title != null">
+				TITLE,
+			</if>
+			<if test="course != null and course.id != null">
+				COURSE_ID,
+			</if>
+			<if test="parentSection != null and parentSection.id != null">
+				PARENT_ID,
+			</if>
+			<if test="timePeriod != null and timePeriod.startTime != null">
+				START_TIME,
+			</if>
+			<if test="timePeriod != null and timePeriod.endTime != null">
+				END_TIME,
+			</if>
+			<if test="isHidden != null">
+				IS_HIDDEN,
+			</if>
+			<if test="sortNo != null">
+				SORT_NO,
+			</if>
+			<if test="creator != null">
+				CREATOR,
+			</if>
+			<if test="createTime != null">
+				CREATE_TIME,
+			</if>
+			<if test="updatedby != null">
+				UPDATEDBY,
+			</if>
+			<if test="updateTime != null">
+				UPDATE_TIME,
+			</if>
+			<if test="isDeleted != null">
+				IS_DELETED,
+			</if>
+			<if test="version != null">
+				VERSION,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=VARCHAR},
+			</if>
+			<if test="title != null">
+				#{title,jdbcType=VARCHAR},
+			</if>
+			<if test="course != null and course.id != null">
+				#{course.id,jdbcType=VARCHAR},
+			</if>
+			<if test="parentSection != null and parentSection.id != null">
+				#{parentSection.id,jdbcType=VARCHAR},
+			</if>
+			<if test="timePeriod != null and timePeriod.startTime != null">
+				#{timePeriod.startTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="timePeriod != null and timePeriod.endTime != null">
+				#{timePeriod.endTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="isHidden != null">
+				#{isHidden,jdbcType=VARCHAR},
+			</if>
+			<if test="sortNo != null">
+				#{sortNo,jdbcType=DECIMAL},
+			</if>
+			<if test="creator != null">
+				#{creator.id,jdbcType=VARCHAR},
+			</if>
+			<if test="createTime != null">
+				#{createTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="updatedby != null">
+				#{updatedby,jdbcType=VARCHAR},
+			</if>
+			<if test="updateTime != null">
+				#{updateTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="isDeleted != null">
+				#{isDeleted,jdbcType=VARCHAR},
+			</if>
+			<if test="version != null">
+				#{version,jdbcType=DECIMAL},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKey" parameterType="com.haoyu.ncts.course.entity.Course">
+		update SECTION
+		<set>
+			<if test="title != null">
+				TITLE = #{title,jdbcType=VARCHAR},
+			</if>
+			<if test="timePeriod != null">
+				<choose>
+					<when test="timePeriod.startTime != null">
+						START_TIME = #{timePeriod.startTime,jdbcType=TIMESTAMP},
+					</when>
+					<otherwise>
+						START_TIME = null,
+					</otherwise>
+				</choose>
+				<choose>
+					<when test="timePeriod.endTime != null">
+						END_TIME = #{timePeriod.endTime,jdbcType=TIMESTAMP},
+					</when>
+					<otherwise>
+						END_TIME = null,
+					</otherwise>
+				</choose>
+			</if>
+			<if test="isHidden != null">
+				IS_HIDDEN = #{isHidden,jdbcType=VARCHAR},
+			</if>
+			<if test="sortNo != null">
+				SORT_NO = #{sortNo,jdbcType=DECIMAL},
+			</if>
+			<if test="updatedby != null and updatedby.id != null">
+				UPDATEDBY = #{updatedby.id,jdbcType=VARCHAR},
+			</if>
+			<if test="updateTime != null">
+				UPDATE_TIME = #{updateTime,jdbcType=INTEGER},
+			</if>
+			<if test="isDeleted != null">
+				IS_DELETED = #{isDeleted,jdbcType=CHAR},
+			</if>
+		</set>
+		,VERSION = VERSION + 1
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<update id="deleteByLogic" parameterType="map">
+		update SECTION 
+		set IS_DELETED = 'Y', UPDATE_TIME = #{entity.updateTime, jdbcType=TIMESTAMP}
+		<if test="entity.updatedby != null and entity.updatedby.id != null and entity.updatedby.id != ''">
+			,UPDATEDBY = #{entity.updatedby.id, jdbcType=VARCHAR}
+		</if>
+		where (ID in 
+		<foreach collection="ids" open="(" close=")" item="item" separator=",">
+			#{item}
+		</foreach>
+		or PARENT_ID in
+		<foreach collection="ids" open="(" close=")" item="item" separator=",">
+			#{item}
+		</foreach>)
+	</update>
+</mapper>

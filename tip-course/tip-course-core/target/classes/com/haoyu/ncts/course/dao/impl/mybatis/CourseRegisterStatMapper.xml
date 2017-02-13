@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.haoyu.ncts.course.dao.impl.mybatis.CourseRegisterStatMapper">
+	<resultMap id="BaseResultMap" type="com.haoyu.ncts.course.entity.CourseRegisterStat">
+		<result column="COURSE_REGISTER_ID" property="courseRegister.id" jdbcType="VARCHAR"/>
+		<result column="SCORE" property="courseResult.score" jdbcType="DECIMAL"/>
+		<result column="RESULT_STATE" property="courseResult.state" jdbcType="VARCHAR"/>
+		<result column="USER_ID" property="courseRegister.user.id" jdbcType="VARCHAR"/>
+		<result column="USER_REAL_NAME" property="courseRegister.user.realName" jdbcType="VARCHAR"/>
+		<result column="USER_DEPT_NAME" property="courseRegister.user.deptName" jdbcType="VARCHAR"/>
+		<result column="COMPLETE_VIDEO_NUM" property="completeVideoNum" jdbcType="INTEGER"/>
+		<result column="COMPLETE_DISCUSSION_NUM" property="completeDiscussionNum" jdbcType="INTEGER"/>
+		<result column="COMPLETE_TEST_NUM" property="completeTestNum" jdbcType="INTEGER"/>
+		<result column="COMPLETE_ASSIGNMENT_NUM" property="completeAssignmentNum" jdbcType="INTEGER"/>
+		<result column="COMPLETE_HTML_NUM" property="completeHtmlNum" jdbcType="INTEGER" />
+		<result column="COMPLETE_SURVEY_NUM" property="completeSurveyNum" jdbcType="INTEGER"/>
+		<result column="FAQ_QUESTION_NUM" property="faqQuestionNum" jdbcType="INTEGER"/>
+		<result column="FAQ_ANSWER_NUM" property="faqAnswerNum" jdbcType="INTEGER"/>
+		<result column="NOTE_NUM" property="noteNum" jdbcType="INTEGER"/>
+		<result column="DISCUSSION_NUM" property="discussionNum" jdbcType="INTEGER"/>
+		<result column="UPLOAD_RESOURCE_NUM" property="uploadResourceNum" jdbcType="INTEGER"/>
+		
+	</resultMap>
+	
+	<select id="select" parameterType="map" resultMap="BaseResultMap">
+		select CR.ID COURSE_REGISTER_ID,CR.USER_ID,
+		(select REAL_NAME from BASE_USER_VIEW BUV where BUV.ID = CR.USER_ID) as USER_REAL_NAME,
+		(select DEPT_NAME from BASE_USER_VIEW BUV where BUV.ID = CR.USER_ID) as USER_DEPT_NAME,
+		CR.CREATE_TIME,
+		CRE.SCORE,
+		CRE.STATE RESULT_STATE,
+		(select count(AR.ID) from ACTIVITY_RESULT AR  where AR.CREATOR = CR.USER_ID and  AR.RELATION_ID = CR.COURSE_ID and AR.STATE = 'complete' and exists(select 1 from ACTIVITY A where A.ID = AR.ACTIVITY_ID and A.IS_DELETED = 'N' and AR.IS_DELETED = 'N' and A.TYPE = 'video') ) COMPLETE_VIDEO_NUM,
+		(select count(AR.ID) from ACTIVITY_RESULT AR  where AR.CREATOR = CR.USER_ID and  AR.RELATION_ID = CR.COURSE_ID and AR.STATE = 'complete' and exists(select 1 from  ACTIVITY A where A.ID = AR.ACTIVITY_ID AND A.IS_DELETED = 'N' AND AR.IS_DELETED = 'N' AND A.TYPE = 'discussion') ) COMPLETE_DISCUSSION_NUM,
+		(select count(AR.ID) from ACTIVITY_RESULT AR  where AR.CREATOR = CR.USER_ID and  AR.RELATION_ID = CR.COURSE_ID and AR.STATE = 'complete' and exists(select 1 from  ACTIVITY A where A.ID = AR.ACTIVITY_ID and A.IS_DELETED = 'N' and AR.IS_DELETED = 'N' and A.TYPE='test') ) COMPLETE_TEST_NUM,
+		(select count(AR.ID) from ACTIVITY_RESULT AR  where AR.CREATOR = CR.USER_ID and  AR.RELATION_ID = CR.COURSE_ID and AR.STATE = 'complete' and exists(select 1 from  ACTIVITY A where A.ID = AR.ACTIVITY_ID and A.IS_DELETED = 'N' and AR.IS_DELETED = 'N' and A.TYPE='assignment') ) COMPLETE_ASSIGNMENT_NUM,
+		(select count(AR.ID) from ACTIVITY_RESULT AR  where AR.CREATOR = CR.USER_ID and  AR.RELATION_ID = CR.COURSE_ID and AR.STATE = 'complete' and exists(select 1 from  ACTIVITY A where A.ID = AR.ACTIVITY_ID and A.IS_DELETED = 'N' and AR.IS_DELETED = 'N' and A.TYPE='html') ) COMPLETE_HTML_NUM,
+		(select count(AR.ID) from ACTIVITY_RESULT AR  where AR.CREATOR = CR.USER_ID and  AR.RELATION_ID = CR.COURSE_ID and AR.STATE = 'complete' and exists(select 1 from  ACTIVITY A where A.ID = AR.ACTIVITY_ID and A.IS_DELETED = 'N' and AR.IS_DELETED = 'N' and A.TYPE='survey') ) COMPLETE_SURVEY_NUM,
+		(select count(FQ.ID) from FAQ_QUESTION FQ where FQ.IS_DELETED = 'N' and FQ.RELATION_ID = CR.COURSE_ID and FQ.CREATOR = CR.USER_ID) FAQ_QUESTION_NUM,
+		(select count(FA.ID) from FAQ_ANSWER FA join FAQ_QUESTION FQ on FA.QUESTION_ID = FQ.ID where FA.IS_DELETED = 'N' and FQ.RELATION_ID = CR.COURSE_ID and FA.CREATOR = CR.USER_ID ) FAQ_ANSWER_NUM,
+		(select count(N.ID) from NOTE N  where N.IS_DELETED = 'N' and  N.CREATOR = CR.USER_ID and N.RELATION_ID in (select ID from SECTION where IS_DELETED='N' and COURSE_ID = CR.COURSE_ID)) NOTE_NUM,
+		(select count(D.ID) from DISCUSSION D join DISCUSSION_RELATION DR on DR.DISCUSSION_ID = D.ID where D.IS_DELETED = 'N' and DR.RELATION_ID = CR.COURSE_ID and CR.USER_ID = D.CREATOR) DISCUSSION_NUM,
+		(select count(R.ID) from RESOURCES R join RESOURCE_RELATION RR on RR.RESOURCE_ID = R.ID where R.IS_DELETED = 'N' and RR.RELATION_ID = CR.COURSE_ID and CR.USER_ID = R.CREATOR ) UPLOAD_RESOURCE_NUM
+		from COURSE_REGISTER CR
+		left join COURSE_RESULT CRE on CRE.COURSE_ID = CR.COURSE_ID and CRE.USER_ID = CR.USER_ID
+		where CR.IS_DELETED = 'N'
+		<if test="courseId != null and courseId != ''">
+			and CR.COURSE_ID = #{courseId,jdbcType=VARCHAR}
+		</if>
+		<if test="realName != null and realName != ''">
+			and  exists(select 1 from BASE_USER_VIEW BUV where BUV.ID = CR.USER_ID and  BUV.REAL_NAME like concat('%',concat(#{realName,jdbcType=VARCHAR},'%') ) )
+		</if>
+		<if test="userId != null and userId != ''">
+			and CR.USER_ID = #{userId,jdbcType=VARCHAR}
+		</if>
+		<if test="courseResultState != null and courseResultState != ''">
+			<choose>
+				<when test="courseResultState == 'pass'">
+					and CRE.STATE = #{courseResultState,jdbcType=VARCHAR}
+				</when>
+				<when test="courseResultState == 'nopass'" >
+					and (CRE.STATE is null or CRE.STATE != 'pass')
+				</when>
+			</choose>
+		</if>
+	</select>
+</mapper>

@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.haoyu.tip.plan.dao.impl.mybatis.PlanAuthorizeMapper">
+	<resultMap id="BaseResultMap" type="com.haoyu.tip.plan.entity.PlanAuthorize">
+		<result column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="PLAN_ID" property="planId" jdbcType="VARCHAR" />
+		<result column="USER_ID" property="user.id" jdbcType="VARCHAR" />
+		<result column="ROLE" property="role" jdbcType="VARCHAR" />
+		<result column="STATE" property="state" jdbcType="VARCHAR" />
+		<result column="CREATOR" property="creator.id" jdbcType="VARCHAR" />
+		<result column="CREATE_TIME" property="createTime" jdbcType="DECIMAL" />
+		<result column="REAL_NAME" property="user.realName" jdbcType="VARCHAR" />
+		<result column="AVATAR" property="user.avatar" jdbcType="VARCHAR" />
+		<result column="SCORE" property="score" jdbcType="DECIMAL" />
+	</resultMap>
+	<resultMap id="UserResultMap" type="com.haoyu.sip.core.entity.User">
+		<result column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="REAL_NAME" property="realName" jdbcType="VARCHAR" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		ID, PLAN_ID, USER_ID, ROLE, STATE
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from PLAN_AUTHORIZE
+		where ID = #{id,jdbcType=VARCHAR}
+	</select>
+	<select id="select" parameterType="map" resultMap="BaseResultMap">
+		select PA.ID, PA.PLAN_ID, PA.USER_ID, PA.ROLE, PA.STATE, PA.CREATE_TIME,
+		BUV.REAL_NAME, BUV.AVATAR
+		from PLAN_AUTHORIZE PA
+		join BASE_USER_VIEW BUV
+		on BUV.ID = PA.USER_ID
+		where PA.IS_DELETED = 'N'
+		<if test="planId != null and planId != ''">
+			and PA.PLAN_ID = #{planId}
+		</if>
+		<if test="state != null and state != ''">
+			and PA.STATE = #{state}
+		</if>
+		<if test="role != null and role != ''">
+			and PA.ROLE = #{role}
+		</if>
+		<if test="userId != null and userId != ''">
+			and PA.USER_ID = #{userId}
+		</if>
+	</select>
+	<insert id="insert" parameterType="com.haoyu.tip.plan.entity.PlanAuthorize">
+		insert into PLAN_AUTHORIZE
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				ID,
+			</if>
+			<if test="planId != null">
+				PLAN_ID,
+			</if>
+			<if test="user != null">
+				USER_ID,
+			</if>
+			<if test="state != null">
+				STATE,
+			</if>
+			<if test="role != null">
+				ROLE,
+			</if>
+			<if test="creator != null and creator.id != null">
+				CREATOR,
+			</if>
+			<if test="createTime != null and createTime > 0">
+				CREATE_TIME,
+			</if>
+			<if test="updatedby != null and updatedby.id != null">
+				UPDATEDBY,
+			</if>
+			<if test="updateTime != null and updateTime > 0">
+				UPDATE_TIME,
+			</if>
+			<if test="isDeleted != null">
+				IS_DELETED,
+			</if>
+			<if test="version != null">
+				VERSION,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=VARCHAR},
+			</if>
+			<if test="planId != null">
+				#{planId,jdbcType=VARCHAR},
+			</if>
+			<if test="user != null">
+				#{user.id,jdbcType=VARCHAR},
+			</if>
+			<if test="state != null">
+				#{state,jdbcType=VARCHAR},
+			</if>
+			<if test="role != null">
+				#{role,jdbcType=VARCHAR},
+			</if>
+			<if test="creator != null and creator.id != null">
+				#{creator.id,jdbcType=VARCHAR},
+			</if>
+			<if test="createTime != null and createTime > 0">
+				#{createTime,jdbcType=DECIMAL},
+			</if>
+			<if test="updatedby != null and updatedby.id != null">
+				#{updatedby.id,jdbcType=VARCHAR},
+			</if>
+			<if test="updateTime != null and updateTime > 0">
+				#{updateTime,jdbcType=DECIMAL},
+			</if>
+			<if test="isDeleted != null">
+				#{isDeleted,jdbcType=CHAR},
+			</if>
+			<if test="version != null">
+				#{version,jdbcType=DECIMAL},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKey" parameterType="com.haoyu.tip.plan.entity.PlanAuthorize">
+		update PLAN_AUTHORIZE
+		<set>
+			<if test="planId != null">
+				PLAN_ID = #{planId,jdbcType=VARCHAR},
+			</if>
+			<if test="user != null">
+				USER_ID = #{user.id,jdbcType=VARCHAR},
+			</if>
+			<if test="state != null">
+				STATE = #{state,jdbcType=VARCHAR},
+			</if>
+			<if test="role != null">
+				ROLE = #{role,jdbcType=VARCHAR},
+			</if>
+			<if test="score != null">
+				SCORE = #{score,jdbcType=DECIMAL},
+			</if>
+			<if test="updatedby != null and updatedby.id != null">
+				UPDATEDBY = #{updatedby.id,jdbcType=VARCHAR},
+			</if>
+			<if test="updateTime != null">
+				UPDATE_TIME = #{updateTime,jdbcType=INTEGER},
+			</if>
+			<if test="isDeleted != null">
+				IS_DELETED = #{isDeleted,jdbcType=CHAR},
+			</if>
+		</set>
+		,VERSION = VERSION + 1
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<update id="deleteByLogic" parameterType="com.haoyu.tip.plan.entity.PlanAuthorize">
+		update PLAN_AUTHORIZE
+		set IS_DELETED = 'Y', UPDATE_TIME = #{updateTime,jdbcType=INTEGER}
+		<if test="updatedby != null and updatedby.id != null and updatedby.id != ''">
+			,UPDATEDBY = #{updatedby.id,jdbcType=VARCHAR}
+		</if>
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<delete id="deleteByPhysics" parameterType="com.haoyu.tip.plan.entity.PlanAuthorize">
+		delete from PLAN_AUTHORIZE
+		<trim prefix="where" prefixOverrides="and">
+			<if test="planId != null and planId != ''">
+				and PLAN_ID = #{planId}
+			</if>
+			<if test="role != null and role != ''">
+				and ROLE = #{role}
+			</if>
+			<if test="id != null and id != ''">
+				and ID = #{id}
+			</if>
+		</trim>
+	</delete>
+	<insert id="insertByIds" parameterType="map">
+		insert into PLAN_AUTHORIZE(ID, PLAN_ID, USER_ID, ROLE, CREATOR, CREATE_TIME, IS_DELETED, VERSION)
+		select ${planAuthorize.id}, #{planAuthorize.planId, jdbcType=VARCHAR}, ID, #{planAuthorize.role, jdbcType=VARCHAR},
+		#{planAuthorize.creator.id, jdbcType=VARCHAR}, #{planAuthorize.createTime, jdbcType=DECIMAL}, #{planAuthorize.isDeleted, jdbcType=VARCHAR},
+		#{planAuthorize.version, jdbcType=DECIMAL}
+		from BASE_USER_VIEW
+		where ID in
+		<foreach collection="ids" open="(" close=")" separator="," item="item">
+			#{item}
+		</foreach>
+	</insert>
+	<update id="updateToMember" parameterType="com.haoyu.tip.plan.entity.PlanAuthorize">
+		update PLAN_AUTHORIZE
+		set ROLE = 'member', UPDATE_TIME = #{updateTime, jdbcType=DECIMAL}
+		<if test="updatedby != null and updatedby != ''">
+			,updatedby = #{updatedby}
+		</if>
+		where IS_DELETED = 'N'
+		and ROLE = 'master'
+		and STATE = 'pass'
+		<if test="planId != null and planId != ''">
+			and PLAN_ID = #{planId}
+		</if>
+	</update>
+	<update id="updateByIds" parameterType="map">
+		update PLAN_AUTHORIZE set
+		<if test="entity.state != null">
+			STATE = #{entity.state, jdbcType=VARCHAR},
+		</if>
+		<if test="entity.role != null">
+			ROLE = #{entity.role, jdbcType=VARCHAR},
+		</if>
+		<if test="entity.updatedby != null">
+			UPDATEDBY = #{entity.updatedby.id, jdbcType=VARCHAR},
+		</if>
+		<if test="entity.updateTime != null and entity.updateTime > 0">
+			UPDATE_TIME = #{entity.updateTime, jdbcType=DECIMAL},
+		</if>
+		VERSION = VERSION + 1
+		where ID in
+		<foreach collection="ids" open="(" close=")" separator="," item="item">
+			#{item}
+		</foreach>
+	</update>
+	<select id="selectMemberUser" parameterType="map" resultMap="UserResultMap">
+		select BUV.ID, BUV.REAL_NAME
+		from PLAN_AUTHORIZE PA
+		join BASE_USER_VIEW BUV
+		on BUV.ID = PA.USER_ID
+		where PA.IS_DELETED = 'N'
+		<if test="planId != null and planId != ''">
+			and PA.PLAN_ID = #{planId}
+		</if>
+		<if test="role != null and role != ''">
+			and PA.ROLE = #{role}
+		</if>
+		<if test="realName != null and realName != ''">
+			and BUV.REAL_NAME like '%${realName}%'
+		</if>
+	</select>
+	<delete id="deleteByIds">
+		delete from PLAN_AUTHORIZE 
+		where ID in
+		<foreach collection="list" open="(" close=")" separator="," item="item">
+			#{item}
+		</foreach>	
+	</delete>
+</mapper>

@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.haoyu.tip.faq.dao.impl.mybatis.FaqQuestionMapper">
+	<resultMap id="BaseResultMap" type="com.haoyu.tip.faq.entity.FaqQuestion">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="RELATION_ID" property="relation.id" jdbcType="VARCHAR" />
+		<result column="CONTENT" property="content" jdbcType="VARCHAR" />
+		<result column="CREATE_TIME" property="createTime" jdbcType="INTEGER" />
+		<result column="CREATOR" property="creator.id" jdbcType="VARCHAR" />
+		<result column="REAL_NAME" property="creator.realName" jdbcType="VARCHAR" />	
+		<result column="AVATAR" property="creator.avatar" jdbcType="VARCHAR" />	
+		<collection property="faqAnswers" ofType="com.haoyu.tip.faq.entity.FaqAnswer">
+	    	<result column="ANSWER_ID" property="id" jdbcType="VARCHAR" />
+			<result column="ANSWER_CONTENT" property="content" jdbcType="VARCHAR" />	
+			<result column="ANSWER_CREATE_TIME" property="createTime" jdbcType="INTEGER" />	
+			<result column="ANSWER_CREATOR" property="creator.id" jdbcType="VARCHAR" />
+			<result column="ANSWER_REAL_NAME" property="creator.realName" jdbcType="VARCHAR" />	
+			<result column="ANSWER_AVATAR" property="creator.avatar" jdbcType="VARCHAR" />	
+	    </collection>
+	</resultMap>
+	<sql id="Base_Column_List">
+		ID, CONTENT,RELATION_ID, CREATE_TIME, CREATOR
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String">
+		select FQ.ID, FQ.CONTENT, FQ.RELATION_ID, FQ.CREATE_TIME, FQ.CREATOR,
+		FA.ID ANSWER_ID, FA.CONTENT ANSWER_CONTENT, FA.CREATE_TIME ANSWER_CREATE_TIME,FA.CREATOR ANSWER_CREATOR,
+		
+		(select BUV.REAL_NAME from BASE_USER_VIEW BUV where BUV.ID = FQ.CREATOR) REAL_NAME,
+		(select BUV.AVATAR from BASE_USER_VIEW BUV where BUV.ID = FQ.CREATOR) AVATAR,
+		(select BUV.REAL_NAME from BASE_USER_VIEW BUV where BUV.ID = FA.CREATOR) ANSWER_REAL_NAME,
+		(select BUV.AVATAR from BASE_USER_VIEW BUV where BUV.ID = FA.CREATOR) ANSWER_AVATAR
+		
+		from FAQ_QUESTION FQ
+		left join FAQ_ANSWER FA
+		on FA.QUESTION_ID = FQ.ID
+		and FA.IS_DELETED = 'N'
+		where FQ.ID = #{id,jdbcType=VARCHAR}
+	</select>
+	<select id="select" resultMap="BaseResultMap" parameterType="com.haoyu.tip.faq.entity.FaqQuestion">
+		select FQ.ID, FQ.CONTENT, FQ.RELATION_ID, FQ.CREATE_TIME, FQ.CREATOR,
+		FA.ID ANSWER_ID, FA.CONTENT ANSWER_CONTENT, FA.CREATE_TIME ANSWER_CREATE_TIME,FA.CREATOR ANSWER_CREATOR,
+		
+		(select BUV.REAL_NAME from BASE_USER_VIEW BUV where BUV.ID = FQ.CREATOR) REAL_NAME,
+		(select BUV.AVATAR from BASE_USER_VIEW BUV where BUV.ID = FQ.CREATOR) AVATAR,
+		(select BUV.REAL_NAME from BASE_USER_VIEW BUV where BUV.ID = FA.CREATOR) ANSWER_REAL_NAME,
+		(select BUV.AVATAR from BASE_USER_VIEW BUV where BUV.ID = FA.CREATOR) ANSWER_AVATAR
+		
+		from FAQ_QUESTION FQ
+		left join FAQ_ANSWER FA
+		on FA.QUESTION_ID = FQ.ID
+		and FA.IS_DELETED = 'N'
+		where FQ.IS_DELETED = 'N'
+		<if test="relation != null and relation.id != null and relation.id != ''">
+			and FQ.RELATION_ID = #{relation.id}
+		</if>
+		<if test="relation != null and relation.type != null and relation.type != ''">
+			and FQ.RELATION_TYPE = #{relation.type}
+		</if>
+		<if test="content != null and content != ''">
+			and FQ.CONTENT like '%${content}%'
+		</if>
+		<if test="creator != null and creator.id != null and creator.id != ''">
+			and FQ.CREATOR = #{creator.id,jdbcType=VARCHAR}
+		</if>
+		<if test="follow != null and follow.creator != null and follow.creator.id !=''">
+		    and exists(select 1 from FOLLOW F where F.FOLLOWED_ID = FQ.ID and F.CREATOR = #{follow.creator.id,jdbcType=VARCHAR})
+		</if>
+	</select>
+	<insert id="insert" parameterType="com.haoyu.tip.faq.entity.FaqQuestion">
+		insert into FAQ_QUESTION
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				ID,
+			</if>
+			<if test="content != null">
+				CONTENT,
+			</if>
+			<if test="relation != null and relation.id != null">
+				RELATION_ID,
+			</if>
+			<if test="relation != null and relation.type != null">
+				RELATION_TYPE,
+			</if>
+			<if test="creator != null">
+				CREATOR,
+			</if>
+			<if test="createTime != null">
+				CREATE_TIME,
+			</if>
+			<if test="updatedby != null">
+				UPDATEDBY,
+			</if>
+			<if test="updateTime != null">
+				UPDATE_TIME,
+			</if>
+			<if test="version != null">
+				VERSION,
+			</if>
+			<if test="isDeleted != null">
+				IS_DELETED,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=VARCHAR},
+			</if>
+			<if test="content != null">
+				#{content,jdbcType=VARCHAR},
+			</if>
+			<if test="relation != null and relation.id != null">
+				#{relation.id,jdbcType=VARCHAR},
+			</if>
+			<if test="relation != null and relation.type != null">
+				#{relation.type,jdbcType=VARCHAR},
+			</if>
+			<if test="creator != null">
+				#{creator.id,jdbcType=VARCHAR},
+			</if>
+			<if test="createTime != null">
+				#{createTime,jdbcType=INTEGER},
+			</if>
+			<if test="updatedby != null">
+				#{updatedby.id,jdbcType=VARCHAR},
+			</if>
+			<if test="updateTime != null">
+				#{updateTime,jdbcType=INTEGER},
+			</if>
+			<if test="version != null">
+				#{version,jdbcType=DECIMAL},
+			</if>
+			<if test="isDeleted != null">
+				#{isDeleted,jdbcType=CHAR},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKey" parameterType="com.haoyu.tip.faq.entity.FaqQuestion">
+		update FAQ_QUESTION
+		<set>
+			<if test="content != null">
+				CONTENT = #{content,jdbcType=VARCHAR},
+			</if>
+			<if test="updatedby != null">
+				UPDATEDBY = #{updatedby.id,jdbcType=VARCHAR},
+			</if>
+			<if test="updateTime != null">
+				UPDATE_TIME = #{updateTime,jdbcType=INTEGER},
+			</if>
+			<if test="isDeleted != null">
+				IS_DELETED = #{isDeleted,jdbcType=CHAR},
+			</if>
+		</set>
+		,VERSION = VERSION + 1
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<update id="deleteByLogic" parameterType="com.haoyu.tip.faq.entity.FaqQuestion">
+		update FAQ_QUESTION
+		set IS_DELETED = 'Y', UPDATE_TIME = #{updateTime,jdbcType=INTEGER}
+		<if test="updatedby != null">
+			,UPDATEDBY = #{updatedby.id,jdbcType=VARCHAR}
+		</if>
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<update id="deleteByIds" parameterType="map">
+		update FAQ_QUESTION
+		set IS_DELETED = 'Y', UPDATE_TIME = #{entity.updateTime,jdbcType=INTEGER}
+		<if test="updatedby != null">
+			,UPDATEDBY = #{entity.id,jdbcType=VARCHAR}
+		</if>
+		where ID in
+		<foreach collection="ids" open="(" close=")" separator="," item="item">
+			#{item}
+		</foreach>
+	</update>
+	<select id="count" parameterType="java.util.Map" resultType="int">
+		select
+			count(FQ.ID)
+		from
+			FAQ_QUESTION FQ
+		where
+			FQ.IS_DELETED = 'N'
+		<if test="relation != null and relation.id != null and relation.id != ''">
+			and FQ.RELATION_ID = #{relation.id}
+		</if>
+		<if test="relation != null and relation.type != null and relation.type != ''">
+			and FQ.RELATION_TYPE = #{relation.type}
+		</if>
+		<if test="content != null and content != ''">
+			and FQ.CONTENT like '%${content}%'
+		</if>
+		<if test="creator != null and creator.id != null and creator.id != ''">
+			and FQ.CREATOR = #{creator.id,jdbcType=VARCHAR}
+		</if>	
+		<if test="followCreatorId != null and followCreatorId != ''">
+		    and exists(select 1 from FOLLOW F where F.FOLLOWED_ID = FQ.ID and F.CREATOR = #{followCreatorId,jdbcType=VARCHAR})
+		</if>
+	</select>
+	
+	<select id="selectFaqQuestion" resultMap="BaseResultMap" parameterType="java.util.Map">
+		select
+			FQ.ID,
+			FQ.CONTENT,
+			FQ.RELATION_ID,
+			FQ.CREATE_TIME,
+			FQ.CREATOR,
+			BUV.REAL_NAME,
+			BUV.AVATAR
+		from
+			FAQ_QUESTION FQ
+		join BASE_USER_VIEW BUV on BUV.ID = FQ.CREATOR
+		where
+			FQ.IS_DELETED = 'N'
+		<if test="relationId != null and relationId != ''">
+			and FQ.RELATION_ID = #{relationId,jdbcType=VARCHAR}
+		</if>
+		<if test="relationType != null and relationType != ''">
+			and FQ.RELATION_TYPE = #{relationType,jdbcType=VARCHAR}
+		</if>
+		<if test="content != null and content != ''">
+			and FQ.CONTENT like '%${content}%'
+		</if>
+		<if test="creator != null and creator.id != null and creator.id != ''">
+			and FQ.CREATOR = #{creator.id,jdbcType=VARCHAR}
+		</if>
+		<if test="follow != null and follow.creator != null and follow.creator.id !=''">
+		    and exists(select 1 from FOLLOW F where F.FOLLOWED_ID = FQ.ID and F.CREATOR = #{follow.creator.id,jdbcType=VARCHAR})
+		</if>
+	</select>
+	
+	<select id="selectByParameter" parameterType="java.util.Map" resultMap="BaseResultMap">
+	    select
+			FQ.ID,
+			FQ.CONTENT,
+			FQ.RELATION_ID,
+			FQ.CREATE_TIME,
+			FQ.CREATOR,
+			FA.ID ANSWER_ID,
+			FA.CONTENT ANSWER_CONTENT,
+			FA.CREATE_TIME ANSWER_CREATE_TIME,
+			FA.CREATOR ANSWER_CREATOR
+		from
+			FAQ_QUESTION FQ
+		left join FAQ_ANSWER FA on FA.QUESTION_ID = FQ. ID and FA.IS_DELETED = 'N'
+		where
+			FQ.IS_DELETED = 'N'
+	    <if test="relationId != null and relationId != ''">
+			and FQ.RELATION_ID = #{relationId,jdbcType=VARCHAR}
+		</if>
+		<if test="content != null and content != ''">
+			and FQ.CONTENT like '%${content}%'
+		</if>
+		<if test="relationType != null and relationType != ''">
+			and FQ.RELATION_TYPE = #{relationType,jdbcType=VARCHAR}
+		</if>
+		<if test="creatorId != null and creatorId != ''">
+			and FQ.CREATOR = #{creatorId,jdbcType=VARCHAR}
+		</if>
+		<if test="follow != null and follow.creator != null and follow.creator.id !=''">
+		    and exists(select 1 from FOLLOW F where F.FOLLOWED_ID = FQ.ID and F.CREATOR = #{follow.creator.id,jdbcType=VARCHAR})
+		</if>
+	</select>
+	
+	<select id="selectFaqQuestionById" resultMap="BaseResultMap" parameterType="java.lang.String">
+		select
+			FQ.ID,
+			FQ.CONTENT,
+			FQ.RELATION_ID,
+			FQ.CREATE_TIME,
+			FQ.CREATOR,
+			BUV.REAL_NAME REAL_NAME
+		from
+			FAQ_QUESTION FQ
+		inner join BASE_USER_VIEW BUV on BUV.ID = FQ.CREATOR
+		where
+			FQ.IS_DELETED = 'N'
+			and FQ.ID = #{id,jdbcType=VARCHAR}
+	</select>
+</mapper>

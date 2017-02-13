@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.haoyu.tip.subjectgroup.dao.impl.mybatis.SubjectGroupRelationMapper">
+	<resultMap id="BaseResultMap" type="com.haoyu.tip.subjectgroup.entity.SubjectGroupRelation">
+		<result column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="SUBJECT_GROUP_ID" property="subjectGroup.id" jdbcType="VARCHAR" />
+		<result column="RELATION_ID" property="relation.id" jdbcType="VARCHAR" />
+		<result column="MEMBER_NUM" property="memberNum" jdbcType="DECIMAL" />
+		<result column="ACTIVITY_NUM" property="activityNum" jdbcType="DECIMAL" />
+		<result column="PLAN_NUM" property="planNum" jdbcType="DECIMAL" />
+		<result column="CREATOR" property="creator.id" jdbcType="VARCHAR" />
+		<result column="CREATE_TIME" property="createTime" jdbcType="DECIMAL" />
+		<result column="UPDATEDBY" property="updatedby.id" jdbcType="VARCHAR" />
+		<result column="UPDATE_TIME" property="updateTime" jdbcType="DECIMAL" />
+		<result column="IS_DELETED" property="isDeleted" jdbcType="CHAR" />
+		<result column="VERSION" property="version" jdbcType="DECIMAL" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		ID, SUBJECT_GROUP_ID, RELATION_ID, MEMBER_NUM, ACTIVITY_NUM, PLAN_NUM, CREATOR, CREATE_TIME
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from SUBJECT_GROUP_RELATION
+		where ID = #{id,jdbcType=VARCHAR}
+	</select>
+	<select id="select" parameterType="map" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from SUBJECT_GROUP_RELATION
+		where IS_DELETED = 'N'
+	</select>
+	<insert id="insert" parameterType="com.haoyu.tip.subjectgroup.entity.SubjectGroupRelation">
+		insert into SUBJECT_GROUP_RELATION
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				ID,
+			</if>
+			<if test="subjectGroup != null">
+				SUBJECT_GROUP_ID,
+			</if>
+			<if test="relation != null">
+				RELATION_ID,
+			</if>
+			<if test="memberNum != null">
+				MEMBER_NUM,
+			</if>
+			<if test="activityNum != null">
+				ACTIVITY_NUM,
+			</if>
+			<if test="planNum != null">
+				PLAN_NUM,
+			</if>
+			<if test="creator != null and creator.id != null">
+				CREATOR,
+			</if>
+			<if test="createTime != null and createTime > 0">
+				CREATE_TIME,
+			</if>
+			<if test="updatedby != null and updatedby.id != null">
+				UPDATEDBY,
+			</if>
+			<if test="updateTime != null and updateTime > 0">
+				UPDATE_TIME,
+			</if>
+			<if test="isDeleted != null">
+				IS_DELETED,
+			</if>
+			<if test="version != null">
+				VERSION,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=VARCHAR},
+			</if>
+			<if test="subjectGroup != null">
+				#{subjectGroup.id,jdbcType=VARCHAR},
+			</if>
+			<if test="relation != null">
+				#{relation.id,jdbcType=VARCHAR},
+			</if>
+			<if test="memberNum != null">
+				#{memberNum,jdbcType=DECIMAL},
+			</if>
+			<if test="activityNum != null">
+				#{activityNum,jdbcType=DECIMAL},
+			</if>
+			<if test="planNum != null">
+				#{planNum,jdbcType=DECIMAL},
+			</if>
+			<if test="creator != null and creator.id != null">
+				#{creator.id,jdbcType=VARCHAR},
+			</if>
+			<if test="createTime != null and createTime > 0">
+				#{createTime,jdbcType=DECIMAL},
+			</if>
+			<if test="updatedby != null and updatedby.id != null">
+				#{updatedby.id,jdbcType=VARCHAR},
+			</if>
+			<if test="updateTime != null and updateTime > 0">
+				#{updateTime,jdbcType=DECIMAL},
+			</if>
+			<if test="isDeleted != null">
+				#{isDeleted,jdbcType=CHAR},
+			</if>
+			<if test="version != null">
+				#{version,jdbcType=DECIMAL},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKey" parameterType="com.haoyu.tip.subjectgroup.entity.SubjectGroupRelation">
+		update SUBJECT_GROUP_RELATION SGR
+		<set>
+			<if test="subjectGroup != null">
+				SUBJECT_GROUP_ID = #{subjectGroup.id,jdbcType=VARCHAR},
+			</if>
+			<if test="relation != null">
+				RELATION_ID = #{relation.id,jdbcType=VARCHAR},
+			</if>
+			<if test="memberNum != null and memberNum > 0">
+				MEMBER_NUM = (select count(ID) from SUBJECT_GROUP_AUTHORIZE where IS_DELETED = 'N' and SUBJECT_GROUP_ID = SGR.SUBJECT_GROUP_ID and STATE = 'pass'),
+			</if>
+			<if test="activityNum != null and activityNum > 0">
+				ACTIVITY_NUM = (select count(A.ID) from ACTIVITY A where IS_DELETED = 'N' 
+				and exists (select 1 from ACTIVITY_RELATION AR where ACTIVITY_ID = A.ID and IS_DELETED = 'N' 
+				and exists (select 1 from PLAN_RELATION where PLAN_ID = AR.RELATION_ID and IS_DELETED = 'N' and RELATION_ID = SGR.SUBJECT_GROUP_ID))),
+			</if>
+			<if test="planNum != null and planNum > 0">
+				PLAN_NUM = (select count(P.ID) from PLAN P where IS_DELETED = 'N' and exists (select 1 from  PLAN_RELATION where PLAN_ID = P.ID and IS_DELETED = 'N' and RELATION_ID = SGR.SUBJECT_GROUP_ID)),
+			</if>
+			<if test="updatedby != null and updatedby.id != null">
+				UPDATEDBY = #{updatedby.id,jdbcType=VARCHAR},
+			</if>
+			<if test="updateTime != null">
+				UPDATE_TIME = #{updateTime,jdbcType=INTEGER},
+			</if>
+			<if test="isDeleted != null">
+				IS_DELETED = #{isDeleted,jdbcType=CHAR},
+			</if>
+		</set>
+		,VERSION = VERSION + 1
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<update id="deleteByLogic" parameterType="com.haoyu.tip.subjectgroup.entity.SubjectGroupRelation">
+		update SUBJECT_GROUP_RELATION
+		set IS_DELETED = 'Y', UPDATE_TIME = #{updateTime,jdbcType=INTEGER}
+		<if test="updatedby != null and updatedby.id != null and updatedby.id != ''">
+			,UPDATEDBY = #{updatedby.id,jdbcType=VARCHAR}
+		</if>
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+</mapper>

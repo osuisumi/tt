@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.haoyu.tip.schedule.dao.impl.mybatis.ScheduleMapper">
+	<resultMap id="ScheduleResultMap" type="com.haoyu.tip.schedule.entity.Schedule">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="TITLE" property="title" jdbcType="VARCHAR" />
+		<result column="SUMMARY" property="summary" jdbcType="VARCHAR" />
+		<result column="STATE" property="state" jdbcType="VARCHAR" />
+		<result column="TYPE" property="type" jdbcType="VARCHAR" />
+		<result column="URL" property="url" jdbcType="VARCHAR"/>
+		<association property="scheduleRelation" javaType="com.haoyu.tip.schedule.entity.ScheduleRelation">
+			<id column="SCHEDULE_RELATION_ID" property="id" jdbcType="VARCHAR" />
+			<result column="RELATION_ID" property="relation.id" jdbcType="VARCHAR" />
+			<result column="RELATION_TYPE" property="relation.type" jdbcType="VARCHAR" />
+			<result column="START_TIME" property="timePeriod.startTime" jdbcType="VARCHAR" />
+			<result column="END_TIME" property="timePeriod.endTime" jdbcType="VARCHAR" />
+		</association>
+	</resultMap>
+	<sql id="Base_Column_List">
+		S.ID,S.TITLE,S.SUMMARY,S.STATE,S.TYPE,S.URL,
+		SR.ID SCHEDULE_RELATION_ID,SR.RELATION_ID,SR.RELATION_TYPE,SR.START_TIME,SR.END_TIME
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="ScheduleResultMap" parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from SCHEDULE S
+		join SCHEDULE_RELATION SR on S.ID = SR.SCHEDULE_ID
+		where S.IS_DELETED='N'
+		and S.ID=#{id,jdbcType=VARCHAR}
+	</select>
+	<select id="selectByParameter" resultMap="ScheduleResultMap" parameterType="java.util.Map">
+		select
+		<include refid="Base_Column_List" />
+		from SCHEDULE S
+		join SCHEDULE_RELATION SR on S.ID = SR.SCHEDULE_ID
+		where S.IS_DELETED='N'
+		<if test="title!=null and title!=''">
+			and S.TITLE LIKE CONCAT('%',CONCAT(#{title,jdbcType=VARCHAR},'%') )
+		</if>
+		<if test="state!=null and state!=''">
+			and S.STATE=#{state,jdbcType=VARCHAR}
+		</if>
+		<if test="type != null and type != ''">
+			and S.TYPE = #{type,jdbcType=VARCHAR}
+		</if>
+		<if test="creator !=null and creator != ''">
+			and S.CREATOR = #{creator,jdbcType=VARCHAR}
+		</if>
+		<if test="minStartTime != null and minStartTime != ''">
+			and SR.START_TIME &gt;= #{minStartTime,jdbcType=DATE}
+		</if>
+		<if test="maxStartTime != null and maxStartTime != ''">
+			and SR.START_TIME &lt;= #{maxStartTime,jdbcType=DATE}
+		</if>
+		<if test="minEndTime != null and minEndTime != ''">
+			and SR.END_TIME &gt;= #{minEndTime,jdbcType=DATE}
+		</if>
+		<if test="maxEndTime != null and maxEndTime != ''">
+			and SR.maxEndTime &lt;= #{maxEndTime,jdbcType=DATE}
+		</if>
+		<if test="relationId != null and relationId != ''">
+			and SR.RELATION_ID = #{relationId,jdbcType=VARCHAR}
+		</if>
+		<if test="relationIds != null">
+			and SR.RELATION_ID in
+			<foreach collection="relationIds" open="(" close=")" item="rid" separator=",">
+				#{rid,jdbcType=VARCHAR}
+			</foreach>
+		</if>
+		<if test="ids != null">
+			and S.ID in
+			<foreach collection="ids" open="(" close=")" item="id" separator=",">
+				#{id,jdbcType=VARCHAR}
+			</foreach>
+		</if>
+	</select>
+	<insert id="insert" parameterType="com.haoyu.tip.schedule.entity.Schedule">
+		insert into SCHEDULE
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				ID,
+			</if>
+			<if test="title != null">
+				TITLE,
+			</if>
+			<if test="summary != null">
+				SUMMARY,
+			</if>
+			<if test="state != null">
+				STATE,
+			</if>
+			<if test="type != null">
+				TYPE,
+			</if>
+			<if test="url != null">
+				URL,
+			</if>
+			<if test="creator != null and creator.id != null">
+				CREATOR,
+			</if>
+			<if test="createTime != null">
+				CREATE_TIME,
+			</if>
+			<if test="updatedby != null">
+				UPDATEDBY,
+			</if>
+			<if test="updateTime != null">
+				UPDATE_TIME,
+			</if>
+			<if test="version != null">
+				VERSION,
+			</if>
+			<if test="isDeleted != null">
+				IS_DELETED,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=VARCHAR},
+			</if>
+			<if test="title != null">
+				#{title,jdbcType=VARCHAR},
+			</if>
+			<if test="summary != null">
+				#{summary,jdbcType=VARCHAR},
+			</if>
+			<if test="state != null">
+				#{state,jdbcType=VARCHAR},
+			</if>
+			<if test="type != null">
+				#{type,jdbcType=VARCHAR},
+			</if>
+			<if test="url != null">
+				#{url,jdbcType=VARCHAR},
+			</if>
+			<if test="creator != null and creator.id != null">
+				#{creator.id,jdbcType=VARCHAR},
+			</if>
+			<if test="createTime != null">
+				#{createTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="updatedby != null">
+				#{updatedby,jdbcType=VARCHAR},
+			</if>
+			<if test="updateTime != null">
+				#{updateTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="version != null">
+				#{version,jdbcType=DECIMAL},
+			</if>
+			<if test="isDeleted != null">
+				#{isDeleted,jdbcType=CHAR},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKey" parameterType="java.lang.String">
+		update SCHEDULE
+		<set>
+			<if test="summary != null and summary!=''">
+				SUMMARY = #{summary,jdbcType=VARCHAR},
+			</if>
+			<if test="title != null and title!=''">
+				TITLE = #{title,jdbcType=VARCHAR},
+			</if>
+			<if test="state != null and state!=''">
+				STATE = #{state,jdbcType=VARCHAR},
+			</if>
+			<if test="type != null and type!=''">
+				TYPE = #{type,jdbcType=VARCHAR},
+			</if>
+			<if test="updatedby != null">
+				UPDATEDBY = #{updatedby.id,jdbcType=VARCHAR},
+			</if>
+			<if test="updateTime != null">
+				UPDATE_TIME = #{updateTime,jdbcType=BIGINT},
+			</if>
+			VERSION = VERSION+1
+		</set>
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+
+	<update id="updateByParameter" parameterType="java.util.Map">
+		update SCHEDULE
+		<set>
+			<if test="summary != null and summary!=''">
+				SUMMARY = #{summary,jdbcType=VARCHAR},
+			</if>
+			<if test="title != null and title!=''">
+				TITLE = #{title,jdbcType=VARCHAR},
+			</if>
+			<if test="state != null and state!=''">
+				STATE = #{state,jdbcType=VARCHAR},
+			</if>
+			<if test="type != null and type!=''">
+				TYPE = #{type,jdbcType=VARCHAR},
+			</if>
+			<if test="updatedby != null">
+				UPDATEDBY = #{updatedby.id,jdbcType=VARCHAR},
+			</if>
+			<if test="updateTime != null">
+				UPDATE_TIME = #{updateTime,jdbcType=BIGINT},
+			</if>
+			VERSION = VERSION+1
+		</set>
+		<where>
+			<if test="userId != null">
+				CREATOR = #{userId,jdbcType=VARCHAR}
+			</if>
+			<if test="relationId != null">
+				and ID in (select SCHEDULE_ID from SCHEDULE_RELATION where RELATION_ID = #{relationId,jdbcType=VARCHAR} )
+			</if>
+		</where>
+	</update>
+
+	<delete id="deleteByPhysics" parameterType="java.lang.String">
+		delete from SCHEDULE
+		where ID=#{id,jdbcType=VARCHAR}
+	</delete>
+	<update id="deleteByLogic" parameterType="com.haoyu.tip.schedule.entity.Schedule">
+		update SCHEDULE
+		set IS_DELETED='Y',
+		<if test="updatedby != null">
+			UPDATEDBY = #{updatedby.id,jdbcType=VARCHAR},
+		</if>
+		<if test="updateTime != null">
+			UPDATE_TIME = #{updateTime,jdbcType=BIGINT},
+		</if>
+		VERSION=VERSION+1
+		where ID=#{id,jdbcType=VARCHAR}
+	</update>
+</mapper>

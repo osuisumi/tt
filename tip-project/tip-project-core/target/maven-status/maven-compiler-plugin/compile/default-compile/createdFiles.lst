@@ -1,0 +1,10 @@
+META-INF\maven\com.haoyu.tip\tip-project-core\pom.xml
+META-INF\MANIFEST.MF
+com\haoyu\tip\project\service\impl\ProjectServiceImpl.class
+com\haoyu\tip\project\dao\impl\mybatis\ProjectDao.class
+META-INF\maven\com.haoyu.tip\tip-project-core\pom.properties
+com\haoyu\tip\project\dao\IProjectDao.class
+com\haoyu\tip\project\template\ProjectsDataDirective.class
+com\haoyu\tip\project\entity\Project.class
+com\haoyu\tip\project\service\IProjectService.class
+com\haoyu\tip\project\template\ProjectDirective.class

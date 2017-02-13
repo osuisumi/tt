@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.haoyu.tip.livestudio.dao.impl.mybatis.LiveStudioRelationMapper">
+	<resultMap type="com.haoyu.tip.livestudio.entity.LiveStudioRelation" id="LiveStudioResultMap"></resultMap>
+
+	
+	<insert id="insert" parameterType="com.haoyu.tip.livestudio.dao.impl.mybatis.LiveStudioRelationDao">
+		insert into LIVE_STUDIO_RELATION
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id!=null">
+				ID,
+			</if>
+			<if test="relation!=null and relation.id!=null">
+				RELATION_ID,
+			</if>
+			<if test="liveStudioId != null">
+				LIVE_STUDIO_ID,
+			</if>
+			<if test="relation!=null and relation.type != null">
+				TYPE,
+			</if>
+			<if test="creator.id != null">
+				CREATOR,
+			</if>
+			<if test="updatedby != null">
+				UPDATEDBY,
+			</if>
+			<if test="createTime != null">
+				CREATE_TIME,
+			</if>
+			<if test="updateTime != null">
+				UPDATE_TIME,
+			</if>
+			<if test="isDeleted != null">
+				IS_DELETED,
+			</if>
+			<if test="version != null">
+				VERSION,
+			</if>
+		</trim>
+		values
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id},
+			</if>
+			<if test="relation!=null and relation.id!=null">
+				#{relation.id},
+			</if>
+			<if test="liveStudioId != null">
+				#{liveStudioId},
+			</if>
+			<if test="relation!=null and relation.type != null">
+				#{type},
+			</if>
+			<if test="creator.id != null">
+				#{creator.id},
+			</if>
+			<if test="updatedby != null">
+				#{updateBy},
+			</if>
+			<if test="createTime != null">
+				#{createTime},
+			</if>
+			<if test="updateTime != null">
+				#{updateTime},
+			</if>
+			<if test="isDeleted != null">
+				#{isDeleted},
+			</if>
+			<if test="version != null">
+				#{version},
+			</if>
+		</trim>
+	</insert>
+	
+	
+</mapper>
+

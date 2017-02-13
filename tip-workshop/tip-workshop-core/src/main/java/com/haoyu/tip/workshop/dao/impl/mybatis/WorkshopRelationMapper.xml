@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.haoyu.tip.workshop.dao.impl.mybatis.WorkshopRelationMapper">
+	<resultMap id="BaseResultMap" type="com.haoyu.tip.workshop.entity.WorkshopRelation">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="WORKSHOP_ID" property="workshop.id" jdbcType="VARCHAR" />
+		<result column="RELATION_ID" property="relation.id" jdbcType="VARCHAR" />
+		<result column="MEMBER_NUM" property="memberNum" jdbcType="VARCHAR" />
+		<result column="ACTIVITY_NUM" property="activityNum" jdbcType="INTEGER" />
+		<result column="RESOURCE_NUM" property="resourceNum" jdbcType="INTEGER" />
+		<result column="FOLLOW_NUM" property="followNum" jdbcType="INTEGER" />
+		<result column="CREATE_TIME" property="createTime" jdbcType="INTEGER" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		ID, WORKSHOP_ID, RELATION_ID, MEMBER_NUM, ACTIVITY_NUM, RESOURCE_NUM, CREATOR, CREATE_TIME
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String">
+		select 
+		<include refid="Base_Column_List" />
+		from WORKSHOP_RELATION
+		where ID = #{id,jdbcType=VARCHAR}
+	</select>
+	<insert id="insert" parameterType="com.haoyu.tip.workshop.entity.WorkshopRelation">
+		insert into WORKSHOP_RELATION
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				ID,
+			</if>
+			<if test="workshop != null and workshop.id != null">
+				WORKSHOP_ID,
+			</if>
+			<if test="relation != null and relation.id !=null">
+				RELATION_ID,
+			</if>
+			<if test="memberNum != null">
+				MEMBER_NUM,
+			</if>
+			<if test="activityNum != null">
+				ACTIVITY_NUM,
+			</if>
+			<if test="resourceNum != null">
+				RESOURCE_NUM,
+			</if>
+			<if test="creator != null and creator.id != null">
+				CREATOR,
+			</if>
+			<if test="createTime != null and createTime > 0">
+				CREATE_TIME,
+			</if>
+			<if test="updatedby != null and updatedby.id != null">
+				UPDATEDBY,
+			</if>
+			<if test="updateTime != null and updateTime > 0">
+				UPDATE_TIME,
+			</if>
+			<if test="version != null">
+				VERSION,
+			</if>
+			<if test="isDeleted != null">
+				IS_DELETED,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=VARCHAR},
+			</if>
+			<if test="workshop != null and workshop.id != null">
+				#{workshop.id,jdbcType=VARCHAR},
+			</if>
+			<if test="relation != null and relation.id !=null">
+				#{relation.id,jdbcType=VARCHAR},
+			</if>
+			<if test="memberNum != null">
+				(select count(ID) from WORKSHOP_AUTHORIZE where IS_DELETED = 'N' and WORKSHOP_ID = #{workshop.id}), 
+			</if>
+			<if test="activityNum != null">
+				#{activityNum,jdbcType=INTEGER},
+			</if>
+			<if test="resourceNum != null">
+				#{resourceNum,jdbcType=INTEGER},
+			</if>
+			<if test="creator != null and creator.id != null">
+				#{creator.id,jdbcType=VARCHAR},
+			</if>
+			<if test="createTime != null and createTime > 0">
+				#{createTime,jdbcType=INTEGER},
+			</if>
+			<if test="updatedby != null and updatedby.id != null">
+				#{updatedby.id,jdbcType=VARCHAR},
+			</if>
+			<if test="updateTime != null and updateTime > 0">
+				#{updateTime,jdbcType=INTEGER},
+			</if>
+			<if test="version != null">
+				#{version,jdbcType=DECIMAL},
+			</if>
+			<if test="isDeleted != null">
+				#{isDeleted,jdbcType=CHAR},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKey" parameterType="com.haoyu.tip.workshop.entity.WorkshopRelation">
+		update WORKSHOP_RELATION WR
+		<set>
+			<if test="memberNum != null and memberNum > 0">
+				MEMBER_NUM = (select count(ID) from WORKSHOP_AUTHORIZE where IS_DELETED = 'N' and WORKSHOP_ID = WR.WORKSHOP_ID and STATE = 'pass') ,
+			</if>
+			<if test="activityNum != null and activityNum > 0">
+				ACTIVITY_NUM = (select count(A.ID) from ACTIVITY A where IS_DELETED = 'N' and STATE = 'published' and exists (select 1 from  ACTIVITY_RELATION where ACTIVITY_ID = A.ID and IS_DELETED = 'N' and RELATION_ID = WR.WORKSHOP_ID)),
+			</if>
+			<if test="resourceNum != null and resourceNum > 0">
+				RESOURCE_NUM = (select count(R.ID) from RESOURCES R where IS_DELETED = 'N' and exists (select 1 from  RESOURCE_RELATION where RESOURCE_ID = R.ID and IS_DELETED = 'N' and RELATION_ID = WR.WORKSHOP_ID)),
+			</if>
+			<if test="followNum != null and followNum > 0">
+				FOLLOW_NUM = (select FOLLOW_NUM from FOLLOW_STAT FS where IS_DELETED = 'N' and FS.FOLLOWED_ID = WR.WORKSHOP_ID),
+			</if>
+			<if test="planNum != null and planNum > 0">
+				PLAN_NUM = (select count(id) from PLAN P where IS_DELETED = 'N' and exists (select 1 from  PLAN_RELATION where PLAN_ID = P.ID and IS_DELETED = 'N' and RELATION_ID = WR.WORKSHOP_ID)),
+			</if>
+			<if test="updatedby != null and updatedby.id != null">
+				UPDATEDBY = #{updatedby.id,jdbcType=VARCHAR},
+			</if>
+			<if test="updateTime != null and updateTime > 0">
+				UPDATE_TIME = #{updateTime,jdbcType=INTEGER},
+			</if>
+			<if test="isDeleted != null">
+				IS_DELETED = #{isDeleted,jdbcType=CHAR},
+			</if>
+		</set>
+		,VERSION = VERSION + 1
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<update id="deleteByLogic" parameterType="com.haoyu.tip.workshop.entity.WorkshopRelation">
+		update WORKSHOP_RELATION
+		set IS_DELETED = 'Y', UPDATE_TIME = #{updateTime,jdbcType=INTEGER}
+		<if test="updatedby != null and updatedby.id != null">
+			,UPDATEDBY = #{updatedby.id,jdbcType=VARCHAR}
+		</if>
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+</mapper>

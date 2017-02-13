@@ -1,0 +1,355 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.haoyu.tip.plan.dao.impl.mybatis.PlanMapper">
+	<resultMap id="BaseResultMap" type="com.haoyu.tip.plan.entity.Plan">
+		<result column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="NAME" property="name" jdbcType="VARCHAR" />
+		<result column="TITLE" property="title" jdbcType="VARCHAR" />
+		<result column="CONTENT" property="content" jdbcType="VARCHAR" />
+		<result column="STATE" property="state" jdbcType="VARCHAR" />
+		<result column="TYPE" property="type" jdbcType="VARCHAR" />
+		<result column="PROJECT_CONTENT" property="projectContent" jdbcType="VARCHAR" />
+		<result column="ONLINE_PROJECT" property="onlineProject" jdbcType="VARCHAR" />
+		<result column="OFFLINE_PROJECT" property="offlineProject" jdbcType="VARCHAR" />
+		<result column="SUMMARY" property="summary" jdbcType="VARCHAR" />
+		<result column="SCORE" property="score" jdbcType="DECIMAL" />
+		<result column="REMARK" property="remark" jdbcType="VARCHAR" />
+		<result column="CREATOR" property="creator.id" jdbcType="VARCHAR" />
+		<result column="CREATE_TIME" property="createTime" jdbcType="DECIMAL" />
+		<result column="UPDATEDBY" property="updatedby.id" jdbcType="VARCHAR" />
+		<result column="UPDATE_TIME" property="updateTime" jdbcType="DECIMAL" />
+		<result column="IS_DELETED" property="isDeleted" jdbcType="CHAR" />
+		<result column="VERSION" property="version" jdbcType="DECIMAL" />
+		<result column="START_TIME" property="timePeriod.startTime" jdbcType="DATE" />
+		<result column="END_TIME" property="timePeriod.endTime" jdbcType="DATE" />
+		<collection property="planRelations" ofType="com.haoyu.tip.plan.entity.PlanRelation">
+			<id property="id" column="PLAN_RELATION_ID" />
+			<result column="RELATION_ID" property="relation.id" jdbcType="VARCHAR" />
+			<result column="RELATION_TYPE" property="relation.type" jdbcType="VARCHAR" />
+			<result column="PLAN_RELATION_START_TIME" property="timePeriod.startTime" jdbcType="DATE"/>
+			<result column="PLAN_RELATION_END_TIME" property="timePeriod.endTime" jdbcType="DATE"/>
+		</collection>
+		<collection property="planResults" ofType="com.haoyu.tip.plan.entity.PlanResult">
+			<id property="id" column="PLAN_RESULT_ID" />
+			<result column="RESULT_TITLE" property="title" jdbcType="VARCHAR" />
+			<result column="REULST_REAL_NAME" property="creator.realName" jdbcType="VARCHAR" />
+			<result column="REULST_CREATE_TIME" property="createTime" jdbcType="VARCHAR" />
+			<result column="FILE_NUM" property="fileNum" jdbcType="INTEGER" />
+			<result column="BROWSE_NUM" property="browseNum" jdbcType="INTEGER" />
+			<result column="DOWNLOAD_NUM" property="downloadNum" jdbcType="INTEGER" />
+		</collection>
+		<collection property="creator" javaType="com.haoyu.sip.core.entity.User">
+			<id property="id" column="CREATOR"/>
+			<result column="CREATOR_REAL_NAME" property="realName"/>
+		</collection>
+	</resultMap>
+	<resultMap id="PlanMap" type="com.haoyu.tip.plan.entity.Plan">
+		<result column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="NAME" property="name" jdbcType="VARCHAR" />
+		<result column="TITLE" property="title" jdbcType="VARCHAR" />
+		<result column="CONTENT" property="content" jdbcType="VARCHAR" />
+		<result column="STATE" property="state" jdbcType="VARCHAR" />
+		<result column="TYPE" property="type" jdbcType="VARCHAR" />
+		<result column="PROJECT_CONTENT" property="projectContent" jdbcType="VARCHAR" />
+		<result column="ONLINE_PROJECT" property="onlineProject" jdbcType="VARCHAR" />
+		<result column="OFFLINE_PROJECT" property="offlineProject" jdbcType="VARCHAR" />
+		<result column="SUMMARY" property="summary" jdbcType="VARCHAR" />
+		<result column="SCORE" property="score" jdbcType="DECIMAL" />
+		<result column="REMARK" property="remark" jdbcType="VARCHAR" />
+		<result column="CREATOR" property="creator.id" jdbcType="VARCHAR" />
+		<result column="REAL_NAME" property="creator.realName" jdbcType="VARCHAR" />
+		<result column="CREATE_TIME" property="createTime" jdbcType="DECIMAL" />
+		<result column="UPDATEDBY" property="updatedby.id" jdbcType="VARCHAR" />
+		<result column="UPDATE_TIME" property="updateTime" jdbcType="DECIMAL" />
+		<result column="IS_DELETED" property="isDeleted" jdbcType="CHAR" />
+		<result column="VERSION" property="version" jdbcType="DECIMAL" />
+		<result column="START_TIME" property="timePeriod.startTime" jdbcType="DATE" />
+		<result column="END_TIME" property="timePeriod.endTime" jdbcType="DATE" />
+		<collection property="planRelations" ofType="com.haoyu.tip.plan.entity.PlanRelation">
+			<id property="id" column="PLAN_RELATION_ID" />
+			<result column="RELATION_ID" property="relation.id" jdbcType="VARCHAR" />
+			<result column="RELATION_TYPE" property="relation.type" jdbcType="VARCHAR" />
+			<result column="PLAN_RELATION_START_TIME" property="timePeriod.startTime" jdbcType="DATE"/>
+			<result column="PLAN_RELATION_END_TIME" property="timePeriod.endTime" jdbcType="DATE"/>
+		</collection>
+	</resultMap>
+	<sql id="Base_Column_List">
+		ID, NAME, TITLE, CONTENT, STATE, TYPE,CREATOR, CREATE_TIME, START_TIME, END_TIME, PROJECT_CONTENT, ONLINE_PROJECT, OFFLINE_PROJECT, SUMMARY, SCORE, REMARK
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String">
+		select P.ID, P.NAME, P.TITLE,P.CONTENT,P.STATE,P.TYPE, P.START_TIME, P.END_TIME, P.CREATE_TIME, P.PROJECT_CONTENT, P.ONLINE_PROJECT, P.OFFLINE_PROJECT, P.SCORE,
+		P.SUMMARY, P.REMARK, P.CREATOR,
+		PR.ID PLAN_RELATION_ID, PR.RELATION_ID, PR.TYPE RELATION_TYPE,PR.START_TIME PLAN_RELATION_START_TIME,PR.END_TIME PLAN_RELATION_END_TIME,
+		PRT.TITLE RESULT_TITLE, PRT.CREATE_TIME REULST_CREATE_TIME, PRT.ID PLAN_RESULT_ID, PRT.FILE_NUM, PRT.BROWSE_NUM, PRT.DOWNLOAD_NUM,
+		(select BUV.REAL_NAME from BASE_USER_VIEW BUV where BUV.ID = PRT.CREATOR) REULST_REAL_NAME,
+		(select BUV.REAL_NAME from BASE_USER_VIEW BUV where BUV.ID = P.CREATOR) CREATOR_REAL_NAME
+		from PLAN P
+		join PLAN_RELATION PR
+		on PR.PLAN_ID = P.ID
+		and PR.IS_DELETED = 'N'
+		left join PLAN_RESULT PRT
+		on PRT.PLAN_ID = P.ID
+		and PRT.IS_DELETED = 'N'
+		where P.ID = #{id,jdbcType=VARCHAR}
+	</select>
+	<select id="select" parameterType="map" resultMap="PlanMap">
+		select P.ID, P.NAME, P.TITLE,P.CONTENT,P.STATE,P.TYPE, P.START_TIME, P.END_TIME, P.CREATE_TIME, P.PROJECT_CONTENT, P.ONLINE_PROJECT, P.OFFLINE_PROJECT, P.SCORE,
+		P.SUMMARY, P.REMARK,
+		PR.ID PLAN_RELATION_ID, PR.RELATION_ID, PR.TYPE RELATION_TYPE,PR.START_TIME PLAN_RELATION_START_TIME,PR.END_TIME PLAN_RELATION_END_TIME,
+		BUV.REAL_NAME
+		from PLAN P
+		join PLAN_RELATION PR
+		on PR.PLAN_ID = P.ID
+		and PR.IS_DELETED = 'N'
+		join BASE_USER_VIEW BUV
+		on BUV.ID = P.CREATOR
+		where P.IS_DELETED = 'N'
+		<if test="relationId != null and relationId != ''">
+			and exists (select 1 from PLAN_RELATION where PLAN_ID = P.ID and IS_DELETED = 'N' and RELATION_ID = #{relationId})
+		</if>
+		<if test="ids != null">
+			and P.ID in 
+			<foreach collection="ids" item="item" open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+		</if>
+	</select>
+	<insert id="insert" parameterType="com.haoyu.tip.plan.entity.Plan">
+		insert into PLAN
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				ID,
+			</if>
+			<if test="name != null">
+				NAME,
+			</if>
+			<if test="title != null">
+				TITLE,
+			</if>
+			<if test="state != null">
+				STATE,
+			</if>
+			<if test="type != null">  
+				TYPE,
+			</if>
+			<if test="projectContent != null">
+				PROJECT_CONTENT,
+			</if>
+			<if test="onlineProject != null">
+				ONLINE_PROJECT,
+			</if>
+			<if test="offlineProject != null">
+				OFFLINE_PROJECT,
+			</if>
+			<if test="summary != null">
+				SUMMARY,
+			</if>
+			<if test="timePeriod != null and timePeriod.startTime != null">
+				START_TIME,
+			</if>
+			<if test="timePeriod != null and timePeriod.endTime != null">
+				END_TIME,
+			</if>
+			<if test="creator != null and creator.id != null">
+				CREATOR,
+			</if>
+			<if test="createTime != null and createTime > 0">
+				CREATE_TIME,
+			</if>
+			<if test="updatedby != null and updatedby.id != null">
+				UPDATEDBY,
+			</if>
+			<if test="updateTime != null and updateTime > 0">
+				UPDATE_TIME,
+			</if>
+			<if test="isDeleted != null">
+				IS_DELETED,
+			</if>
+			<if test="version != null">
+				VERSION,
+			</if>
+			<if test="content != null">
+				CONTENT,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=VARCHAR},
+			</if>
+			<if test="name != null">
+				#{name,jdbcType=VARCHAR},
+			</if>
+			<if test="title != null">
+				#{title,jdbcType=VARCHAR},
+			</if>
+			<if test="state != null">
+				#{state,jdbcType=VARCHAR},
+			</if>
+			<if test="type != null">
+				#{type,jdbcType=VARCHAR},
+			</if>
+			<if test="projectContent != null">
+				#{projectContent,jdbcType=VARCHAR},
+			</if>
+			<if test="onlineProject != null">
+				#{onlineProject,jdbcType=VARCHAR},
+			</if>
+			<if test="offlineProject != null">
+				#{offlineProject,jdbcType=VARCHAR},
+			</if>
+			<if test="summary != null">
+				#{summary,jdbcType=VARCHAR},
+			</if>
+			<if test="timePeriod != null and timePeriod.startTime != null">
+				#{timePeriod.startTime,jdbcType=DATE},
+			</if>
+			<if test="timePeriod != null and timePeriod.endTime != null">
+				#{timePeriod.endTime,jdbcType=DATE},
+			</if>
+			<if test="creator != null and creator.id != null">
+				#{creator.id,jdbcType=VARCHAR},
+			</if>
+			<if test="createTime != null and createTime > 0">
+				#{createTime,jdbcType=DECIMAL},
+			</if>
+			<if test="updatedby != null and updatedby.id != null">
+				#{updatedby.id,jdbcType=VARCHAR},
+			</if>
+			<if test="updateTime != null and updateTime > 0">
+				#{updateTime,jdbcType=DECIMAL},
+			</if>
+			<if test="isDeleted != null">
+				#{isDeleted,jdbcType=CHAR},
+			</if>
+			<if test="version != null">
+				#{version,jdbcType=DECIMAL},
+			</if>
+			<if test="content != null">
+				#{content,jdbcType=VARCHAR},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKey" parameterType="com.haoyu.tip.plan.entity.Plan">
+		update PLAN
+		<set>
+			<if test="title != null">
+				TITLE = #{title,jdbcType=VARCHAR},
+			</if>
+			<if test="name != null">
+				NAME = #{name,jdbcType=VARCHAR},
+			</if>
+			<if test="content != null">
+				CONTENT = #{content,jdbcType=VARCHAR},
+			</if>
+			<if test="state != null">
+				STATE = #{state,jdbcType=VARCHAR},
+			</if>
+			<if test="type != null">
+				TYPE = #{type,jdbcType=VARCHAR},
+			</if>
+			<if test="projectContent != null">
+				PROJECT_CONTENT = #{projectContent,jdbcType=VARCHAR},
+			</if>
+			<if test="onlineProject != null">
+				ONLINE_PROJECT = #{onlineProject,jdbcType=VARCHAR},
+			</if>
+			<if test="offlineProject != null">
+				OFFLINE_PROJECT = #{offlineProject,jdbcType=VARCHAR},
+			</if>
+			<if test="summary != null">
+				SUMMARY = #{summary,jdbcType=VARCHAR},
+			</if>
+			<if test="score != null">
+				SCORE = #{score,jdbcType=DECIMAL},
+			</if>
+			<if test="remark != null">
+				REMARK = #{remark,jdbcType=VARCHAR},
+			</if>
+			<if test="timePeriod != null and timePeriod.startTime != null">
+				START_TIME = #{timePeriod.startTime,jdbcType=DATE},
+			</if>
+			<if test="timePeriod != null and timePeriod.endTime != null">
+				END_TIME = #{timePeriod.endTime,jdbcType=DATE},
+			</if>
+			<if test="updatedby != null and updatedby.id != null">
+				UPDATEDBY = #{updatedby.id,jdbcType=VARCHAR},
+			</if>
+			<if test="updateTime != null">
+				UPDATE_TIME = #{updateTime,jdbcType=INTEGER},
+			</if>
+			<if test="isDeleted != null">
+				IS_DELETED = #{isDeleted,jdbcType=CHAR},
+			</if>
+		</set>
+		,VERSION = VERSION + 1
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<update id="updateByIdNotSelective" parameterType="com.haoyu.tip.plan.entity.Plan">
+		update PLAN
+		<set>
+			<if test="title != null">
+				TITLE = #{title,jdbcType=VARCHAR},
+			</if>
+			<if test="name != null">
+				NAME = #{name,jdbcType=VARCHAR},
+			</if>
+			<if test="type != null">
+				TYPE = #{type,jdbcType=VARCHAR},
+			</if>
+			<if test="content != null">
+				CONTENT = #{content,jdbcType=VARCHAR},
+			</if>
+			<if test="projectContent != null">
+				PROJECT_CONTENT = #{projectContent,jdbcType=VARCHAR},
+			</if>
+			<if test="onlineProject != null">
+				ONLINE_PROJECT = #{onlineProject,jdbcType=VARCHAR},
+			</if>
+			<if test="offlineProject != null">
+				OFFLINE_PROJECT = #{offlineProject,jdbcType=VARCHAR},
+			</if>
+			<if test="summary != null">
+				SUMMARY = #{summary,jdbcType=VARCHAR},
+			</if>
+			<if test="score != null">
+				SCORE = #{score,jdbcType=DECIMAL},
+			</if>
+			<if test="remark != null">
+				REMARK = #{remark,jdbcType=VARCHAR},
+			</if>
+			<if test="timePeriod != null">
+				START_TIME = #{timePeriod.startTime,jdbcType=DATE},
+			</if>
+			<if test="timePeriod != null">
+				END_TIME = #{timePeriod.endTime,jdbcType=DATE},
+			</if>
+			<if test="updatedby != null">
+				UPDATEDBY = #{updatedby.id,jdbcType=VARCHAR},
+			</if>
+			<if test="updateTime != null and updateTime > 0">
+				UPDATE_TIME = #{updateTime,jdbcType=INTEGER},
+			</if>
+		</set>
+		,VERSION = VERSION + 1
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<update id="deleteByLogic" parameterType="com.haoyu.tip.plan.entity.Plan">
+		update PLAN
+		set IS_DELETED = 'Y', UPDATE_TIME = #{updateTime,jdbcType=INTEGER}
+		<if test="updatedby != null and updatedby.id != null and updatedby.id != ''">
+			,UPDATEDBY = #{updatedby.id,jdbcType=VARCHAR}
+		</if>
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<select id="selectCount" parameterType="map" resultType="java.lang.Integer">
+		select count(P.ID)
+		from PLAN P
+		<if test="relationId != null and relationId != ''">
+			join PLAN_RELATION PR
+			on PR.PLAN_ID = P.ID
+			and PR.IS_DELETED = 'N'
+			and PR.RELATION_ID = #{relationId}
+		</if>
+		where P.IS_DELETED = 'N'
+	</select>
+</mapper>

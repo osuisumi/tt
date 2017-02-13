@@ -1,0 +1,451 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.haoyu.ncts.course.dao.impl.mybatis.CourseMapper">
+	<resultMap id="BaseResultMap" type="com.haoyu.ncts.course.entity.Course">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="TITLE" property="title" jdbcType="VARCHAR" />
+		<result column="TYPE" property="type" jdbcType="VARCHAR" />
+		<result column="ORGANIZATION" property="organization" jdbcType="VARCHAR" />
+		<result column="CODE" property="code" jdbcType="VARCHAR" />
+		<result column="TERM_NO" property="termNo" jdbcType="VARCHAR" />
+		<result column="DESCRIPTION" property="description" jdbcType="VARCHAR" />
+		<result column="SUMMARY" property="summary" jdbcType="VARCHAR" />
+		<result column="CONTENT" property="content" jdbcType="VARCHAR" />
+		<result column="IMAGE" property="image" jdbcType="VARCHAR" />
+		<result column="STUDY_HOURS" property="studyHours" jdbcType="DECIMAL" />
+		<result column="SUBJECT" property="subject" jdbcType="VARCHAR" />
+		<result column="STAGE" property="stage" jdbcType="VARCHAR" />
+		<result column="HOUR_LENGTH" property="hourLength" jdbcType="DECIMAL" />
+		<result column="STATE" property="state" jdbcType="VARCHAR" />
+		<result column="RESULT_SETTINGS" property="resultSettings" jdbcType="VARCHAR" />
+		<result column="SOURCE_ID" property="sourceId" jdbcType="VARCHAR" />
+		<result column="CREATOR" property="creator.id" jdbcType="VARCHAR" />
+		<result column="REAL_NAME" property="creator.realName" jdbcType="VARCHAR" />
+		<result column="CREATE_TIME" property="createTime" jdbcType="TIMESTAMP" />
+		<result column="START_TIME" property="timePeriod.startTime" jdbcType="TIMESTAMP" />
+		<result column="END_TIME" property="timePeriod.endTime" jdbcType="TIMESTAMP" />
+		<result column="IS_TEMPLATE" property="isTemplate" jdbcType="VARCHAR" />
+		<result column="RELATION_ID" property="courseRelation.relation.id" jdbcType="VARCHAR" />
+		<result column="COURSE_CATEGORY" property="courseCateGory" jdbcType="VARCHAR"/>
+	</resultMap>
+	<sql id="BaseSelectSql">
+		select C.ID, C.TITLE, C.TYPE, C.ORGANIZATION, C.CODE, C.TERM_NO, C.DESCRIPTION, C.SUMMARY, C.CONTENT, C.IMAGE, C.STUDY_HOURS, C.SUBJECT, C.STAGE, C.HOUR_LENGTH, C.STATE,
+		C.CREATOR, C.CREATE_TIME, C.RESULT_SETTINGS, C.START_TIME, C.END_TIME, C.SOURCE_ID, C.IS_TEMPLATE, C.UPDATE_TIME,C.COURSE_CATEGORY,
+		(select BUV.REAL_NAME from BASE_USER_VIEW BUV where BUV.ID = C.CREATOR) REAL_NAME,
+		(select CR.RELATION_ID from COURSE_RELATION cr where CR.COURSE_ID = C.ID and CR.IS_DELETED = 'N') RELATION_ID
+	</sql>
+	<sql id="BaseFromSql">
+		from COURSE C
+	</sql>
+	<sql id="BaseWhereSql">
+		<choose>
+			<when test="isDeleted != null and isDeleted != ''">
+				where C.IS_DELETED = #{isDeleted}
+			</when>
+			<otherwise>
+				where C.IS_DELETED = 'N'
+			</otherwise>
+		</choose>
+		<if test="title != null and title != ''">
+			and C.TITLE like '%${title}%'
+		</if>
+		<if test="state != null and state != ''">
+			and #{state} like concat('%',concat(C.STATE,'%'))
+		</if>
+		<if test="type != null and type != ''">
+			and C.TYPE = #{type}
+		</if>
+		<if test="relationId != null and relationId != ''">
+			and exists (select 1 from COURSE_RELATION CR where CR.COURSE_ID = C.ID and CR.IS_DELETED = 'N' and CR.RELATION_ID = #{relationId})
+		</if>
+		<if test="creator != null and creator != ''">
+			and C.CREATOR = #{creator}
+		</if>
+		<if test="notExistsCourseRelation != null and notExistsCourseRelation != ''">
+			and not exists (select 1 from COURSE_RELATION where COURSE_ID = C.ID and IS_DELETED = 'N')
+		</if>
+		<if test="brachRelationIdNeq != null and brachRelationIdNeq != ''">
+			and not exists (select 1 from COURSE C1 where SOURCE_ID = C.ID and IS_DELETED = 'N' and exists (select 1 from COURSE_RELATION where COURSE_ID = C1.ID and IS_DELETED = 'N' and RELATION_ID = #{brachRelationIdNeq}))
+		</if>
+		<if test="ids != null">
+			and C.ID in 
+			<foreach collection="ids" open="(" close=")" item="item" separator=",">
+				#{item}
+			</foreach>
+		</if>
+		<if test="courseAuthorizeUserId != null and courseAuthorizeUserId != '' and courseAuthorizeRole != null and courseAuthorizeRole != ''">
+			<choose>
+				<when test="courseAuthorizeType != null and courseAuthorizeType == 'branch'.toString() ">
+					and (
+						exists (select 1 from COURSE_AUTHORIZE where COURSE_ID = C.ID and USER_ID = #{courseAuthorizeUserId} and ROLE = #{courseAuthorizeRole} and IS_DELETED = 'N')
+						or exists (select 1 from COURSE C1 where IS_DELETED = 'N' and SOURCE_ID = C.ID and exists ((select 1 from COURSE_AUTHORIZE where COURSE_ID = C1.ID and USER_ID = #{courseAuthorizeUserId} and ROLE = #{courseAuthorizeRole} and IS_DELETED = 'N')))
+					)
+				</when>
+				<otherwise>
+					and exists (select 1 from COURSE_AUTHORIZE where COURSE_ID = C.ID and USER_ID = #{courseAuthorizeUserId} and ROLE = #{courseAuthorizeRole} and IS_DELETED = 'N')
+				</otherwise>
+			</choose>
+		</if>
+		<if test="subject != null and subject != ''">
+			and C.SUBJECT like #{subject,jdbcType=VARCHAR}
+		</if>
+		<if test="stage != null and stage != ''">
+			and C.STAGE = #{stage,jdbcType=VARCHAR}
+		</if>
+		<if test="registerId != null and registerId != ''">
+			and C.ID in
+			(select COURSE_ID from COURSE_REGISTER CRG 
+				where CRG.IS_DELETED = 'N' and CRG.COURSE_ID = C.ID and CRG.USER_ID = #{registerId,jdbcType=VARCHAR} 
+				<if test="registerState != null and registerState != ''">
+					and CRG.STATE = #{registerState,jdbcType=VARCHAR}
+				</if>
+			 )
+		</if>
+		<if test="startTimeGreaterThan != null">
+			and C.START_TIME <![CDATA[>]]>  #{startTimeGreaterThan,jdbcType=TIMESTAMP}
+		</if>
+		<if test="startTimeLessThanOrEquals != null">
+			and C.START_TIME <![CDATA[<=]]>  #{startTimeLessThanOrEquals,jdbcType=TIMESTAMP}
+		</if>
+		<if test="endTimeGreaterThanOrEquals != null">
+			and C.END_TIME <![CDATA[>=]]>  #{endTimeGreaterThanOrEquals,jdbcType=TIMESTAMP}
+		</if>
+		<if test="endTimeLessThan != null">
+			and C.END_TIME <![CDATA[<]]>  #{endTimeLessThan,jdbcType=TIMESTAMP}
+		</if>
+		<if test="isTemplate != null and isTemplate != ''">
+			and C.IS_TEMPLATE = #{isTemplate, jdbcType=VARCHAR}
+		</if>
+		<if test="sourceId != null and sourceId != ''">
+			and C.SOURCE_ID = #{sourceId,jdbcType=VARCHAR}
+		</if>
+		<if test="relationIds != null">
+			and exists (select 1 from COURSE_RELATION CR where CR.COURSE_ID = C.ID and CR.RELATION_ID in
+			<foreach collection="relationIds" open="(" close=")" item="item" separator=",">
+				#{item,jdbcType=VARCHAR}
+			</foreach>
+			)
+		</if>
+	</sql>
+	<select id="select" parameterType="map" resultMap="BaseResultMap">
+		<include refid="BaseSelectSql" />
+		<include refid="BaseFromSql" />
+		<include refid="BaseWhereSql" />
+	</select>
+	<select id="selectByPrimaryKey" parameterType="java.util.Map" resultMap="BaseResultMap">
+		<include refid="BaseSelectSql" />
+		<include refid="BaseFromSql" />
+		where C.ID = #{id, jdbcType=VARCHAR}
+	</select>
+	<select id="getCount" parameterType="map" resultType="int">
+		select count(C.ID) 
+		<include refid="BaseFromSql" />
+		<include refid="BaseWhereSql" />
+	</select>
+	<insert id="insert" parameterType="com.haoyu.ncts.course.entity.Course">
+		insert into COURSE
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				ID,
+			</if>
+			<if test="title != null">
+				TITLE,
+			</if>
+			<if test="type != null">
+				TYPE,
+			</if>
+			<if test="organization != null">
+				ORGANIZATION,
+			</if>
+			<if test="code != null">
+				CODE,
+			</if>
+			<if test="termNo != null">
+				TERM_NO,
+			</if>
+			<if test="description != null">
+				DESCRIPTION,
+			</if>
+			<if test="summary != null">
+				SUMMARY,
+			</if>
+			<if test="content != null">
+				CONTENT,
+			</if>
+			<if test="image != null">
+				IMAGE,
+			</if>
+			<if test="studyHours != null">
+				STUDY_HOURS,
+			</if>
+			<if test="subject != null">
+				SUBJECT,
+			</if>
+			<if test="stage != null">
+				STAGE,
+			</if>
+			<if test="hourLength != null">
+				HOUR_LENGTH,
+			</if>
+			<if test="state != null">
+				STATE,
+			</if>
+			<if test="timePeriod != null and timePeriod.startTime != null">
+				START_TIME,
+			</if>
+			<if test="timePeriod != null and timePeriod.endTime != null">
+				END_TIME,
+			</if>
+			<if test="sourceId != null">
+				SOURCE_ID,
+			</if>
+			<if test="resultSettings != null and resultSettings != ''">
+				RESULT_SETTINGS,
+			</if>
+			<if test="isTemplate != null">
+				IS_TEMPLATE,
+			</if>
+			<if test="creator != null">
+				CREATOR,
+			</if>
+			<if test="createTime != null">
+				CREATE_TIME,
+			</if>
+			<if test="updatedby != null">
+				UPDATEDBY,
+			</if>
+			<if test="updateTime != null">
+				UPDATE_TIME,
+			</if>
+			<if test="isDeleted != null">
+				IS_DELETED,
+			</if>
+			<if test="version != null">
+				VERSION,
+			</if>
+			<if test="courseCateGory != null">
+				COURSE_CATEGORY,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=VARCHAR},
+			</if>
+			<if test="title != null">
+				#{title,jdbcType=VARCHAR},
+			</if>
+			<if test="type != null">
+				#{type,jdbcType=VARCHAR},
+			</if>
+			<if test="organization != null">
+				#{organization,jdbcType=VARCHAR},
+			</if>
+			<if test="code != null">
+				#{code,jdbcType=VARCHAR},
+			</if>
+			<if test="termNo != null">
+				#{termNo,jdbcType=VARCHAR},
+			</if>
+			<if test="description != null">
+				#{description,jdbcType=VARCHAR},
+			</if>
+			<if test="summary != null">
+				#{summary,jdbcType=VARCHAR},
+			</if>
+			<if test="content != null">
+				#{content,jdbcType=VARCHAR},
+			</if>
+			<if test="image != null">
+				#{image,jdbcType=VARCHAR},
+			</if>
+			<if test="studyHours != null">
+				#{studyHours,jdbcType=DECIMAL},
+			</if>
+			<if test="subject != null">
+				#{subject,jdbcType=VARCHAR},
+			</if>
+			<if test="stage != null">
+				#{stage,jdbcType=VARCHAR},
+			</if>
+			<if test="hourLength != null">
+				#{hourLength,jdbcType=DECIMAL},
+			</if>
+			<if test="state != null">
+				#{state,jdbcType=VARCHAR},
+			</if>
+			<if test="timePeriod != null and timePeriod.startTime != null">
+				#{timePeriod.startTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="timePeriod != null and timePeriod.endTime != null">
+				#{timePeriod.endTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="sourceId != null">
+				#{sourceId,jdbcType=VARCHAR},
+			</if>
+			<if test="resultSettings != null and resultSettings != ''">
+				#{resultSettings,jdbcType=VARCHAR},
+			</if>
+			<if test="isTemplate != null">
+				#{isTemplate,jdbcType=VARCHAR},
+			</if>
+			<if test="creator != null">
+				#{creator.id,jdbcType=VARCHAR},
+			</if>
+			<if test="createTime != null">
+				#{createTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="updatedby != null">
+				#{updatedby,jdbcType=VARCHAR},
+			</if>
+			<if test="updateTime != null">
+				#{updateTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="isDeleted != null">
+				#{isDeleted,jdbcType=VARCHAR},
+			</if>
+			<if test="version != null">
+				#{version,jdbcType=DECIMAL},
+			</if>
+			<if test="courseCateGory != null">
+				#{courseCateGory,jdbcType=VARCHAR},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKey" parameterType="com.haoyu.ncts.course.entity.Course">
+		update COURSE
+		<set>
+			<if test="title != null">
+				TITLE = #{title,jdbcType=VARCHAR},
+			</if>
+			<if test="type != null">
+				TYPE = #{type,jdbcType=VARCHAR},
+			</if>
+			<if test="organization != null">
+				ORGANIZATION = #{organization,jdbcType=VARCHAR},
+			</if>
+			<if test="termNo != null">
+				TERM_NO = #{termNo,jdbcType=VARCHAR},
+			</if>
+			<if test="description != null">
+				DESCRIPTION = #{description,jdbcType=VARCHAR},
+			</if>
+			<if test="summary != null">
+				SUMMARY = #{summary,jdbcType=VARCHAR},
+			</if>
+			<if test="content != null">
+				CONTENT = #{content,jdbcType=VARCHAR},
+			</if>
+			<if test="image != null">
+				IMAGE = #{image,jdbcType=VARCHAR},
+			</if>
+			<if test="studyHours != null">
+				STUDY_HOURS = #{studyHours,jdbcType=DECIMAL},
+			</if>
+			<if test="subject != null">
+				SUBJECT = #{subject,jdbcType=VARCHAR},
+			</if>
+			<if test="stage != null">
+				STAGE = #{stage,jdbcType=VARCHAR},
+			</if>
+			<if test="hourLength != null">
+				HOUR_LENGTH = #{hourLength,jdbcType=DECIMAL},
+			</if>
+			<if test="state != null">
+				STATE = #{state,jdbcType=VARCHAR},
+			</if>
+			<if test="resultSettings != null and resultSettings != ''">
+				RESULT_SETTINGS = #{resultSettings,jdbcType=VARCHAR},
+			</if>
+			<if test="timePeriod != null">
+				<choose>
+					<when test="timePeriod.startTime != null">
+						START_TIME = #{timePeriod.startTime,jdbcType=TIMESTAMP},
+					</when>
+					<otherwise>
+						START_TIME = null,
+					</otherwise>
+				</choose>
+				<choose>
+					<when test="timePeriod.endTime != null">
+						END_TIME = #{timePeriod.endTime,jdbcType=TIMESTAMP},
+					</when>
+					<otherwise>
+						END_TIME = null,
+					</otherwise>
+				</choose>
+			</if>
+			<if test="updatedby != null and updatedby.id != null">
+				UPDATEDBY = #{updatedby.id,jdbcType=VARCHAR},
+			</if>
+			<if test="updateTime != null">
+				UPDATE_TIME = #{updateTime,jdbcType=INTEGER},
+			</if>
+			<if test="isDeleted != null">
+				IS_DELETED = #{isDeleted,jdbcType=CHAR},
+			</if>
+		</set>
+		,VERSION = VERSION + 1
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<update id="deleteByLogic" parameterType="map">
+		update COURSE 
+		set IS_DELETED = 'Y', UPDATE_TIME = #{entity.updateTime, jdbcType=TIMESTAMP}
+		<if test="entity.updatedby != null and entity.updatedby.id != null and entity.updatedby.id != ''">
+			,UPDATEDBY = #{entity.updatedby.id, jdbcType=VARCHAR}
+		</if>
+		where ID in 
+		<foreach collection="ids" open="(" close=")" item="item" separator=",">
+			#{item}
+		</foreach>
+	</update>
+	<delete id="deleteByPhysics">
+		delete from COURSE
+		where ID in 
+		<foreach collection="list" open="(" close=")" item="item" separator=",">
+			#{item}
+		</foreach>
+	</delete>
+	<update id="retrieve" parameterType="map">
+		update COURSE 
+		set IS_DELETED = 'N', UPDATE_TIME = #{entity.updateTime, jdbcType=TIMESTAMP}
+		<if test="entity.updatedby != null and entity.updatedby.id != null and entity.updatedby.id != ''">
+			,UPDATEDBY = #{entity.updatedby.id, jdbcType=VARCHAR}
+		</if>
+		where ID in 
+		<foreach collection="ids" open="(" close=")" item="item" separator=",">
+			#{item}
+		</foreach>
+	</update>
+	<update id="updateByIds" parameterType="map">
+		update COURSE C
+		set UPDATE_TIME = #{entity.updateTime,jdbcType=INTEGER}
+		<if test="updatedby != null">
+			,UPDATEDBY = #{entity.id,jdbcType=VARCHAR}
+		</if>
+		<if test="entity!=null and entity.state!=null">
+			,STATE = #{entity.state}
+		</if>
+		where ID in
+		<foreach collection="ids" open="(" close=")" separator="," item="item">
+			#{item}
+		</foreach>
+	</update>
+	<select id="selectBySource" resultMap="BaseResultMap" parameterType="map" >
+	    select ID, CODE
+	    from COURSE C
+	    where C.IS_DELETED='N'
+	    <if test="selectType != null and selectType == 'hasCourseRegisterOfBranch'.toString()">
+	    	and exists (select 1 from COURSE C1 where C.ID = C1.SOURCE_ID and C1.IS_DELETED = 'N'
+		    and exists (select 1 from COURSE_REGISTER CR where CR.COURSE_ID = C1.ID and CR.IS_DELETED = 'N' and CR.RELATION_ID = #{relationId}
+		    and CR.USER_ID = #{userId}))
+	    </if>
+	    <if test="selectType != null and selectType == 'brachCourse'.toString()">
+	    	and exists (select 1 from COURSE C1 where C1.ID = C.SOURCE_ID and C1.IS_DELETED = 'N' and C1.CODE = #{parentcode})
+	    	and exists (select 1 from COURSE_RELATION CR where CR.IS_DELETED= 'N' and CR.COURSE_ID = C.ID and CR.RELATION_ID = #{relationId})
+	    </if>
+	</select>
+	<select id="getCourseMaxCode" resultType="string">
+		select CODE from COURSE
+		where CREATE_TIME = (select MAX(CREATE_TIME) from course)
+	</select>
+</mapper>

@@ -1,0 +1,4 @@
+com\haoyu\tip\resource\mobile\controller\MResourceController.class
+com\haoyu\tip\resource\mobile\entity\MResource.class
+com\haoyu\tip\resource\mobile\service\IMResourceService.class
+com\haoyu\tip\resource\mobile\service\impl\MResourceServiceImpl.class

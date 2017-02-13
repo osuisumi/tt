@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.haoyu.ncts.clazz.dao.impl.mybatis.ClassMapper">
+	<resultMap id="BaseResultMap" type="com.haoyu.ncts.clazz.entity.Class">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="NAME" property="name" jdbcType="VARCHAR" />
+		<result column="RELATION_ID" property="relation.id" jdbcType="VARCHAR" />
+		<result column="COURSE_ID" property="course.id" jdbcType="VARCHAR" />
+		<result column="CREATOR" property="creator.id" jdbcType="VARCHAR" />
+		<result column="CREATE_TIME" property="createTime" jdbcType="TIMESTAMP" />
+		<result column="PERSON_NUM" property="personNum" jdbcType="DECIMAL" />
+	</resultMap>
+	<sql id="BaseSelectSql">
+		select C.ID,C.RELATION_ID,C.COURSE_ID,C.NAME,C.CREATOR,C.CREATE_TIME,
+		(select count(ID) from COURSE_REGISTER CR where CR.CLASS_ID = C.ID and CR.IS_DELETED = 'N' and CR.STATE = 'pass') PERSON_NUM
+		from CLASS C
+	</sql>
+	<select id="select" parameterType="map" resultMap="BaseResultMap">
+		<include refid="BaseSelectSql" />
+		where C.IS_DELETED = 'N'
+		<if test="courseId != null and courseId != ''">
+			and C.COURSE_ID = #{courseId,jdbcType=VARCHAR}
+		</if>
+		<if test="relationId != null and relationId != ''">
+			and C.RELATION_ID = #{relationId,jdbcType=VARCHAR}
+		</if>
+		<if test="name != null and name != ''">
+			and C.NAME like '%${name}%'
+		</if>
+	</select>
+	<select id="selectByPrimaryKey" parameterType="string" resultMap="BaseResultMap">
+		<include refid="BaseSelectSql" /> 
+		where C.ID = #{id, jdbcType=VARCHAR}
+	</select>
+	<insert id="insert" parameterType="com.haoyu.ncts.clazz.entity.Class">
+		insert into CLASS
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				ID,
+			</if>
+			<if test="course != null and course.id != null">
+				COURSE_ID,
+			</if>
+			<if test="relation != null and relation.id != null">
+				RELATION_ID,
+			</if>
+			<if test="name != null and name != null">
+				NAME,
+			</if>
+			<if test="creator != null">
+				CREATOR,
+			</if>
+			<if test="createTime != null">
+				CREATE_TIME,
+			</if>
+			<if test="isDeleted != null">
+				IS_DELETED,
+			</if>
+			<if test="version != null">
+				VERSION,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=VARCHAR},
+			</if>
+			<if test="course != null and course.id != null">
+				#{course.id,jdbcType=VARCHAR},
+			</if>
+			<if test="relation != null and relation.id != null">
+				#{relation.id,jdbcType=VARCHAR},
+			</if>
+			<if test="name != null and name != null">
+				#{name,jdbcType=VARCHAR},
+			</if>
+			<if test="creator != null">
+				#{creator.id,jdbcType=VARCHAR},
+			</if>
+			<if test="createTime != null">
+				#{createTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="isDeleted != null">
+				#{isDeleted,jdbcType=VARCHAR},
+			</if>
+			<if test="version != null">
+				#{version,jdbcType=DECIMAL},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKey" parameterType="com.haoyu.ncts.clazz.entity.Class">
+		update CLASS
+		<set>
+			<if test="name != null and name != null">
+				NAME = #{name,jdbcType=VARCHAR},
+			</if>
+			<if test="updatedby != null and updatedby.id != null">
+				UPDATEDBY = #{updatedby.id,jdbcType=VARCHAR},
+			</if>
+			<if test="updateTime != null">
+				UPDATE_TIME = #{updateTime,jdbcType=INTEGER},
+			</if>
+			<if test="isDeleted != null">
+				IS_DELETED = #{isDeleted,jdbcType=CHAR},
+			</if>
+		</set>
+		,VERSION = VERSION + 1
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<update id="deleteByLogic" parameterType="map">
+		update CLASS 
+		set IS_DELETED = 'Y',
+		UPDATE_TIME = #{entity.updateTime, jdbcType=TIMESTAMP},
+		UPDATEDBY = #{entity.updatedby.id,jdbcType=VARCHAR}
+		where ID in
+		<foreach collection="ids" open="(" close=")" item="id" separator=",">
+			#{id,jdbcType=VARCHAR}
+		</foreach>
+	</update>
+</mapper>

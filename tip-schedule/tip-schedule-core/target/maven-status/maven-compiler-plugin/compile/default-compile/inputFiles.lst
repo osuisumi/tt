@@ -1,0 +1,13 @@
+E:\workshopspace\base\tip\tip-schedule\tip-schedule-core\src\main\java\com\haoyu\tip\schedule\entity\ScheduleRelation.java
+E:\workshopspace\base\tip\tip-schedule\tip-schedule-core\src\main\java\com\haoyu\tip\schedule\web\param\ScheduleParam.java
+E:\workshopspace\base\tip\tip-schedule\tip-schedule-core\src\main\java\com\haoyu\tip\schedule\event\CreateScheduleEvent.java
+E:\workshopspace\base\tip\tip-schedule\tip-schedule-core\src\main\java\com\haoyu\tip\schedule\dao\IScheduleDao.java
+E:\workshopspace\base\tip\tip-schedule\tip-schedule-core\src\main\java\com\haoyu\tip\schedule\dao\IScheduleRelationDao.java
+E:\workshopspace\base\tip\tip-schedule\tip-schedule-core\src\main\java\com\haoyu\tip\schedule\service\IScheduleService.java
+E:\workshopspace\base\tip\tip-schedule\tip-schedule-core\src\main\java\com\haoyu\tip\schedule\entity\Schedule.java
+E:\workshopspace\base\tip\tip-schedule\tip-schedule-core\src\main\java\com\haoyu\tip\schedule\event\CreateSchedulesEvent.java
+E:\workshopspace\base\tip\tip-schedule\tip-schedule-core\src\main\java\com\haoyu\tip\schedule\service\impl\ScheduleRelationServiceImpl.java
+E:\workshopspace\base\tip\tip-schedule\tip-schedule-core\src\main\java\com\haoyu\tip\schedule\service\IScheduleRelationService.java
+E:\workshopspace\base\tip\tip-schedule\tip-schedule-core\src\main\java\com\haoyu\tip\schedule\service\impl\ScheduleServiceImpl.java
+E:\workshopspace\base\tip\tip-schedule\tip-schedule-core\src\main\java\com\haoyu\tip\schedule\dao\impl\mybatis\ScheduleDao.java
+E:\workshopspace\base\tip\tip-schedule\tip-schedule-core\src\main\java\com\haoyu\tip\schedule\dao\impl\mybatis\ScheduleRelationDao.java

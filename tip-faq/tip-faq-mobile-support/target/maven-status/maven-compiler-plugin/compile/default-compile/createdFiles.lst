@@ -1,0 +1,8 @@
+com\haoyu\tip\faq\mobile\service\impl\MFaqAnswerService.class
+com\haoyu\tip\faq\mobile\service\IMFaqAnswerService.class
+com\haoyu\tip\faq\mobile\entity\MFaqAnswer.class
+com\haoyu\tip\faq\mobile\controller\MFaqQuestionController.class
+com\haoyu\tip\faq\mobile\service\impl\MFaqQuestionService.class
+com\haoyu\tip\faq\mobile\controller\MFaqAnswerController.class
+com\haoyu\tip\faq\mobile\entity\MFaqQuestion.class
+com\haoyu\tip\faq\mobile\service\IMFaqQuestionService.class

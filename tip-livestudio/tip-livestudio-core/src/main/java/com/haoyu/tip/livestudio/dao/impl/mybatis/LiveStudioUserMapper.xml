@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.haoyu.tip.livestudio.dao.impl.mybatis.LiveStudioUserMapper">
+	<resultMap id="LiveStudioUserResultMap" type="com.haoyu.tip.livestudio.entity.LiveStudioUser">
+		<collection property="user" column="USER_ID" javaType="com.haoyu.sip.core.entity.User">
+		    		<result column="REAL_NAME" property="realName"/>
+		</collection>
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		ID,CREATOR,UPDATEDBY,CREATE_TIME,UPDATE_TIME,IS_DELETED,VERSION,LIVE_STUDIO_ID,USER_ID,USER_TYPE
+	</sql>
+	
+	
+	
+	<delete id="deleteByPhysics" parameterType="java.lang.String">
+		delete from LIVE_STUDIO_USER LSU
+		where LSU.ID=#{id,jdbcType=VARCHAR}
+	</delete>
+	
+	<update id="deleteByLogic" parameterType="java.lang.String">
+		update LIVE_STUDIO_USER set IS_DELETED='Y'
+		where LSU.ID=#{id,jdbcType=VARCHAR}
+	</update>
+	
+	
+
+	<!-- 插入 -->
+	<insert id="insert" parameterType="com.haoyu.tip.livestudio.entity.LiveStudioUser">
+		insert into LIVE_STUDIO_USER
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				ID,
+			</if>
+			<if test="liveStudioId != null">
+				LIVE_STUDIO_ID,
+			</if>
+			<if test="user != null">
+				USER_ID,
+			</if>
+			<if test="userType != null">
+				USER_TYPE,
+			</if>
+			<if test="updatedby != null">
+				UPDATEDBY,
+			</if>
+			<if test="createTime != null">
+				CREATE_TIME,
+			</if>
+			<if test="updateTime != null">
+				UPDATE_TIME,
+			</if>
+			<if test="isDeleted != null">
+				IS_DELETED,
+			</if>
+			<if test="version != null">
+				VERSION
+			</if>
+		</trim>
+
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id},
+			</if>
+			<if test="liveStudioId != null">
+				#{liveStudioId},
+			</if>
+			<if test="user != null">
+				#{user.id},
+			</if>
+			<if test="userType != null">
+				#{userType},
+			</if>
+			<if test="updatedby != null">
+				#{updatedby},
+			</if>
+			<if test="createTime != null">
+				#{createTime},
+			</if>
+			<if test="updateTime != null">
+				#{updateTime},
+			</if>
+			<if test="isDeleted != null">
+				#{isDeleted},
+			</if>
+			<if test="version != null">
+				#{version}
+			</if>
+		</trim>
+	</insert>
+
+	
+</mapper>

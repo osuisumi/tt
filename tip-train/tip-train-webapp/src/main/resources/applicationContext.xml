@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="
+http://www.springframework.org/schema/beans 
+http://www.springframework.org/schema/beans/spring-beans.xsd
+http://www.springframework.org/schema/context
+http://www.springframework.org/schema/context/spring-context.xsd 
+http://www.springframework.org/schema/tx 
+http://www.springframework.org/schema/tx/spring-tx.xsd
+http://www.springframework.org/schema/aop 
+http://www.springframework.org/schema/aop/spring-aop.xsd
+">
+	<context:annotation-config />
+	<context:component-scan base-package="com.haoyu">
+		<context:exclude-filter type="annotation"
+			expression="org.springframework.stereotype.Controller" />
+		<context:exclude-filter type="annotation"
+			expression="org.springframework.web.bind.annotation.RestController" />
+	</context:component-scan>
+	<bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource"
+		init-method="init" destroy-method="close">
+		<property name="url"
+			value="jdbc:mysql://192.168.0.2:3306/nts?useUnicode=true&amp;characterEncoding=UTF-8" />
+		<property name="username" value="root" />
+		<property name="password" value="" />
+		<property name="initialSize" value="1" />
+		<property name="maxActive" value="20" />
+	</bean>
+	<!-- myBatis文件 -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<!-- 自动扫描entity目录, 省掉Configuration.xml里的手工配置 -->
+		<property name="mapperLocations">
+			<array>
+				<value>classpath*:**/*Mapper.xml</value>
+			</array>
+		</property>
+		<property name="configLocation" value="classpath:mybatis-config.xml" />
+	</bean>
+	
+	<!--  -->
+	<bean id="propertiesLoader" class="com.haoyu.sip.core.utils.PropertiesLoader">
+		<constructor-arg index="0" value="common.properties"></constructor-arg>
+	</bean>
+	
+
+</beans>

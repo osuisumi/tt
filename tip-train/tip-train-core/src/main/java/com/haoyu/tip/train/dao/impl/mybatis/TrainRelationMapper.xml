@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.haoyu.tip.train.dao.impl.mybatis.TrainRelationMapper">
+	<resultMap id="TrainRelationResultMap" type="com.haoyu.tip.train.entity.TrainRelation">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="TRAIN_ID" property="train.id" jdbcType="VARCHAR"/>
+		<result column="RELATION_ID" property="relation.id" jdbcType="VARCHAR"/>
+		<result column="RELATION_TYPE" property="relation.type" jdbcType="VARCHAR"/>
+	</resultMap>
+	<select id="selectByPrimaryKey" resultMap="TrainRelationResultMap" parameterType="java.lang.String">
+		select
+		TR.ID,TR.TRAIN_ID,TR.RELATION_ID,TR.RELATION_TYPE
+		from TRAIN_RELATION TR
+		where TR.IS_DELETED='N'
+		and TR.ID=#{id,jdbcType=VARCHAR}
+	</select>
+	<select id="selectByParameter" resultMap="TrainRelationResultMap" parameterType="java.util.Map">
+		select
+		TR.ID,TR.TRAIN_ID,TR.RELATION_ID,TR.RELATION_TYPE
+		from TRAIN_RELATION TR
+		where TR.IS_DELETED='N'
+		<if test="trainId != null and trainId != ''">
+			and TR.TRAIN_ID = #{trainId,jdbcType=VARCHAR}
+		</if>
+		<if test="relationId != null and relationId != ''">
+			and TR.RELATION_ID = #{relationId,jdbcType=VARCHAR}
+		</if>
+		<if test="relationType != null and relationType != ''">
+			and TR.RELATION_TYPE = #{relationType,jdbcType=VARCHAR}
+		</if>
+		<if test="trainIds != null">
+			and TR.TRAIN_id in
+			<foreach collection="trainIds" open="(" close=")" separator="," item="trainId">
+				#{trainId,jdbcType=VARCHAR}
+			</foreach>
+		</if>
+	</select>
+	<insert id="insert" parameterType="com.haoyu.tip.train.entity.TrainRelation">
+		insert into TRAIN_RELATION
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				ID,
+			</if>
+			<if test="train !=null and train.id != null">
+				TRAIN_ID,
+			</if>
+			<if test="relation != null and relation.id != null">
+				RELATION_ID,
+			</if>
+			<if test="relation != null and relation.type != null">
+				RELATION_TYPE,
+			</if>
+			<if test="creator != null and creator.id != null">
+				CREATOR,
+			</if>
+			<if test="createTime != null">
+				CREATE_TIME,
+			</if>
+			<if test="updatedby != null">
+				UPDATEDBY,
+			</if>
+			<if test="updateTime != null">
+				UPDATE_TIME,
+			</if>
+			<if test="version != null">
+				VERSION,
+			</if>
+			<if test="isDeleted != null">
+				IS_DELETED,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType = VARCHAR},
+			</if>
+			<if test="train !=null and train.id != null">
+				#{train.id,jdbcType = VARCHAR},
+			</if>
+			<if test="relation != null and  relation.id != null">
+				#{relation.id,jdbcType = VARCHAR},
+			</if>
+			<if test="relation != null and relation.type != null">
+				#{relation.type,jdbcType = VARCHAR},
+			</if>
+			<if test="creator != null">
+				#{creator.id,jdbcType=VARCHAR},
+			</if>
+			<if test="createTime != null">
+				#{createTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="updatedby != null">
+				#{updatedby,jdbcType=VARCHAR},
+			</if>
+			<if test="updateTime != null">
+				#{updateTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="version != null">
+				#{version,jdbcType=DECIMAL},
+			</if>
+			<if test="isDeleted != null">
+				#{isDeleted,jdbcType=CHAR},
+			</if>
+		</trim>
+	</insert>
+	<delete id="deleteByPhysics" parameterType="java.lang.String">
+		delete from TRAIN_RELATION
+		where ID=#{id,jdbcType=VARCHAR}
+	</delete>
+	
+	<delete id="batchDeleteByPhysics" parameterType="java.util.List">
+		delete from TRAIN_RELATION
+		where ID in
+		<foreach collection="list" open="(" close=")" item="id" separator=",">
+			#{id}
+		</foreach>
+	</delete>
+</mapper>

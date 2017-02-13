@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p" xmlns:context="http://www.springframework.org/schema/context" xsi:schemaLocation="http://www.springframework.org/schema/beans 
+http://www.springframework.org/schema/beans/spring-beans.xsd
+http://www.springframework.org/schema/context 
+http://www.springframework.org/schema/context/spring-context.xsd 
+http://www.springframework.org/schema/mvc 
+http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+
+	<mvc:annotation-driven />
+	<context:component-scan base-package="com.haoyu.**.controller" />
+	<context:component-scan base-package="com.haoyu.sip.gallery.controller" />
+	<context:component-scan base-package="com.haoyu.**.web" />
+	<!-- <context:component-scan base-package="com.haoyu.sip.tag.controller" /> -->
+	<!-- <mvc:resources mapping="/js/**" location="/js/" /> <mvc:resources mapping="/css/**" location="/css/" /> <mvc:resources mapping="/images/**" location="/images/" /> -->
+	<mvc:default-servlet-handler />
+	<!-- spring的属性加载器，加载properties文件中的属性 -->
+	<bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="location">
+			<value>/WEB-INF/classes/common.properties</value>
+		</property>
+		<property name="fileEncoding" value="utf-8" />
+	</bean>
+	<mvc:resources mapping="/js/**" location="/js/" />
+	<mvc:resources mapping="/css/**" location="/css/" />
+	<mvc:resources mapping="/images/**" location="/images/" />
+	<mvc:resources mapping="/*.png" location="/*.png" />
+	<mvc:resources mapping="/library/**" location="/library/" />
+	<mvc:default-servlet-handler />
+	<mvc:interceptors>
+		<mvc:interceptor>
+			<mvc:mapping path="/**" />
+			<bean class="com.github.miemiedev.mybatis.paginator.springmvc.PageListAttrHandlerInterceptor" autowire-candidate="true" />
+		</mvc:interceptor>
+	</mvc:interceptors>
+	<!-- 引入属性文件 -->
+	<!-- <context:property-placeholder location="classpath:config.properties" /> -->
+	<!-- <bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter"> <property name="messageConverters"> <list> 避免IE执行AJAX时,返回JSON出现下载文件 <bean id="mappingJacksonHttpMessageConverter" class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter"> <property name="supportedMediaTypes"> <list> <value>text/html;charset=UTF-8</value> </list> </property> </bean> </list> </property> 线程安全的访问session <property name="synchronizeOnSession" value="true"/> <property name="customArgumentResolvers"> <list> <bean class="com.haoyi.ipanther.core.spring.mvc.method.annotation.RequestJsonParamMethodArgumentResolver"/> <bean class="com.haoyi.ipanther.core.spring.mvc.method.annotation.FormModelMethodArgumentResolver"/> </list> </property> </bean> <bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping"/> -->
+	<!-- 对模型视图名称的解析，即在模型视图名称添加前后缀 -->
+	<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver" p:prefix="/WEB-INF/views/" p:suffix=".jsp" p:order="1" />
+	<!-- FreeMarker视图解析 -->
+	<bean id="freeMarkerViewResolver" class="org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver">
+		<property name="cache" value="true" />
+		<property name="contentType" value="text/html;charset=UTF-8"></property>
+		<!-- <property name="prefix" value="/WEB-INF/templates/"/> -->
+		<property name="suffix" value=".ftl" />
+		<property name="order" value="0" />
+		<property name="requestContextAttribute" value="request" />
+		<property name="attributesMap" ref="freemarkerStaticModels" />
+	</bean>
+	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver" p:defaultEncoding="UTF-8" p:maxUploadSize="524288000" p:uploadTempDir="upload/temp/" />
+	<bean id="freemarkerConfigurer" class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer">
+		<property name="templateLoaderPath" value="${templateLoaderPath}" />
+		<property name="defaultEncoding" value="UTF-8" />
+		<property name="freemarkerSettings">
+			<props>
+				<prop key="template_update_delay">10</prop>
+				<!-- <prop key="locale">zh_CN</prop> -->
+				<prop key="datetime_format">yyyy-MM-dd HH:mm:ss</prop>
+				<prop key="date_format">yyyy-MM-dd</prop>
+				<prop key="number_format">#.##</prop>
+				<!-- <prop key="auto_import">/ftl/common/macros.ftl as html</prop> <prop key="tag_syntax">auto_detect</prop> -->
+			</props>
+		</property>
+		<property name="freemarkerVariables">
+		<map>
+			<entry key="ctx" value="/tip-train-webapp" />
+			<entry key="projectListDirective">
+				<bean class="com.haoyu.tip.project.template.ProjectDataDirective"/>
+			</entry>
+			<entry key="trainListDirective">
+				<bean class="com.haoyu.tip.train.template.TrainDataDirective"/>
+			</entry>
+		</map>
+		
+		</property>
+	</bean>
+
+	<bean id="freemarkerStaticModelsProps" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+		<property name="location" value="classpath:freemarkerstatic.properties" />
+	</bean>
+
+	<bean id="freemarkerStaticModels" class="com.haoyu.sip.core.freemarker.FreemarkerStaticModels" factory-method="getInstance">
+		<property name="staticModels" ref="freemarkerStaticModelsProps" />
+	</bean>
+</beans>

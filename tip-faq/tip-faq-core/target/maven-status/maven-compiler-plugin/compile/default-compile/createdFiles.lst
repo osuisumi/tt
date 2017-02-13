@@ -1,0 +1,15 @@
+com\haoyu\tip\faq\dao\IFaqQuestionDao.class
+com\haoyu\tip\faq\template\FaqQuestionDataDirective.class
+com\haoyu\base\entity\BaseEntity.class
+com\haoyu\tip\faq\service\impl\FaqQuestionServiceImpl.class
+com\haoyu\base\utils\BaseServiceUtils.class
+com\haoyu\tip\faq\service\IFaqQuestionService.class
+com\haoyu\tip\faq\dao\impl\mybatis\FaqAnswerDao.class
+com\haoyu\tip\faq\dao\IFaqAnswerDao.class
+com\haoyu\tip\faq\service\IFaqAnswerService.class
+com\haoyu\tip\faq\service\impl\FaqAnswerServiceImpl.class
+com\haoyu\tip\faq\entity\FaqQuestion.class
+com\haoyu\tip\faq\template\FaqQuestionsDataDirective.class
+com\haoyu\tip\faq\dao\impl\mybatis\FaqQuestionDao.class
+com\haoyu\tip\faq\event\CreateFaqAnswerEvent.class
+com\haoyu\tip\faq\entity\FaqAnswer.class

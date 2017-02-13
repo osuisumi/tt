@@ -1,0 +1,388 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.haoyu.tip.train.dao.impl.mybatis.TrainMapper">
+	<resultMap id="TrainResultMap" type="com.haoyu.tip.train.entity.Train">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="NAME" property="name" jdbcType="VARCHAR" />
+		<result column="DESCRIPTION" property="description" jdbcType="VARCHAR" />
+		<result column="STATE" property="state" jdbcType="VARCHAR" />
+		<result column="TYPE" property="type" jdbcType="VARCHAR" />
+		<result column="STUDY_HOURS_TYPE" property="studyHoursType" jdbcType="VARCHAR" />
+		<result column="TRAINING_TIME_START" property="trainingTime.startTime" jdbcType="TIMESTAMP" />
+		<result column="TRAINING_TIME_END" property="trainingTime.endTime" jdbcType="TIMESTAMP" />
+		<result column="REGISTER_TIME_START" property="registerTime.startTime" jdbcType="TIMESTAMP" />
+		<result column="REGISTER_TIME_END" property="registerTime.endTime" jdbcType="TIMESTAMP" />
+		<result column="ELECTIVES_TIME_START" property="electivesTime.startTime" jdbcType="TIMESTAMP" />
+		<result column="ELECTIVES_TIME_END" property="electivesTime.endTime" jdbcType="TIMESTAMP" />
+		<result column="REGISTER_NUM" property="registerNum" jdbcType="INTEGER" />
+		<result column="ELECTIVES_NUM" property="electivesNum" jdbcType="INTEGER" />
+		<result column="TARGET" property="target" jdbcType="VARCHAR"/>
+		<result column="STUDY_HOURS" property="studyHours" jdbcType="DECIMAL" />
+		<result column="PRICE" property="price" jdbcType="DECIMAL" />
+		<result column="CHARGE_TYPE" property="chargeType" jdbcType="VARCHAR" />
+		<association property="project" javaType="com.haoyu.tip.project.entity.Project">
+			<id column="PROJECT_ID" property="id" jdbcType="VARCHAR" />
+			<result column="PROJECT_NAME" property="name" jdbcType="VARCHAR"/>
+			<result column="PROJECT_DESCRIPTION" property="description" jdbcType="VARCHAR"/>
+		</association>
+	</resultMap>
+	<sql id="Base_Column_List">
+		T.ID,T.PROJECT_ID,T.NAME,T.DESCRIPTION,T.STATE,T.TYPE,T.TRAINING_TIME_START,T.TRAINING_TIME_END,T.REGISTER_TIME_START,T.REGISTER_TIME_END,T.ELECTIVES_TIME_START,T.ELECTIVES_TIME_END,T.REGISTER_NUM,T.ELECTIVES_NUM,T.CREATE_TIME,T.TARGET,T.STUDY_HOURS_TYPE
+		,T.STUDY_HOURS,T.PRICE,T.CHARGE_TYPE
+		,P.NAME PROJECT_NAME,P.DESCRIPTION PROJECT_DESCRIPTION
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="TrainResultMap" parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from TRAIN T
+		join PROJECT P on T.PROJECT_ID = P.ID
+		where T.IS_DELETED='N'
+		and T.ID=#{id,jdbcType=VARCHAR}
+	</select>
+	<select id="selectByParameter" resultMap="TrainResultMap" parameterType="java.util.Map">
+		select
+		<include refid="Base_Column_List" />
+		from TRAIN T
+		join PROJECT P on T.PROJECT_ID = P.ID
+		where T.IS_DELETED='N'
+		<if test="name!=null and name!=''">
+			and T.NAME LIKE CONCAT('%',CONCAT(#{name,jdbcType=VARCHAR},'%') )
+		</if>
+		<if test="state!=null and state!=''">
+			and T.STATE=#{state,jdbcType=VARCHAR}
+		</if>
+		<if test="projectId != null and projectId != ''">
+			and T.PROJECT_ID = #{projectId,jdbcType=VARCHAR}
+		</if>
+		<if test="projectIds != null">
+			and T.PROJECT_ID in
+			<foreach collection="projectIds" open="(" close=")" item="proId" separator=",">
+				#{proId,jdbcType=VARCHAR}
+			</foreach>
+		</if>
+		<if test="ids != null">
+			and T.ID in
+			<foreach collection="ids" open="(" close=")" item="item" separator=",">
+				#{item,jdbcType=VARCHAR}
+			</foreach>
+		</if>
+		<if test="type != null and type != ''">
+			and T.TYPE = #{type,jdbcType = VARCHAR}
+		</if>
+		<if test="minTrainingStartTime !=null and minTrainingStartTime != ''">
+			and T.TRAINING_TIME_START &gt;= #{minTrainingStartTime,jdbcType=TIMESTAMP}
+		</if>
+		<if test="maxTrainingStartTime != null and maxTrainingStartTime != ''">
+			and T.TRAINING_TIME_START &lt;= #{maxTrainingStartTime,jdbcType=TIMESTAMP}
+		</if>
+		<if test="minTrainingEndTime != null and minTrainingEndTime != ''">
+			and T.TRAINING_TIME_END &gt; = #{minTrainingEndTime,jdbcType=TIMESTAMP}
+		</if>
+		<if test="maxTrainingEndTime != null and maxTrainingEndTime != ''">
+			and T.TRAINING_TIME_END &lt;  #{maxTrainingEndTime,jdbcType=TIMESTAMP}
+		</if>
+		<!--registerProgressParam  -->
+		<if test="minRegisterStartTime !=null and minRegisterStartTime != ''">
+			and T.REGISTER_TIME_START &gt;= #{minRegisterStartTime,jdbcType=TIMESTAMP}
+		</if>
+		<if test="maxRegisterStartTime != null and maxRegisterStartTime != ''">
+			and T.REGISTER_TIME_START &lt; #{maxRegisterStartTime,jdbcType=TIMESTAMP}
+		</if>
+		<if test="minRegisterEndTime != null and minRegisterEndTime != ''">
+			and T.REGISTER_TIME_END &gt; = #{minRegisterEndTime,jdbcType=TIMESTAMP}
+		</if>
+		<if test="maxRegisterEndTime != null and maxRegisterEndTime != ''">
+			and T.REGISTER_TIME_END &lt;  #{maxRegisterEndTime,jdbcType=TIMESTAMP}
+		</if>
+		<!-- electivesProgressParam -->
+		<if test="minElectivesStartTime !=null and minElectivesStartTime != ''">
+			and T.ELECTIVES_TIME_START &gt;= #{minElectivesStartTime,jdbcType=TIMESTAMP}
+		</if>
+		<if test="maxElectivesStartTime != null and maxElectivesStartTime != ''">
+			and T.ELECTIVES_TIME_START &lt; #{maxElectivesStartTime,jdbcType=TIMESTAMP}
+		</if>
+		<if test="minElectivesEndTime != null and minElectivesEndTime != ''">
+			and T.ELECTIVES_TIME_END &gt; = #{minElectivesEndTime,jdbcType=TIMESTAMP}
+		</if>
+		<if test="maxElectivesEndTime != null and maxElectivesEndTime != ''">
+			and T.ELECTIVES_TIME_END &lt;  #{maxElectivesEndTime,jdbcType=TIMESTAMP}
+		</if>
+		<!-- <if test="trainingProgressParam != null and trainingProgressParam != ''">
+			<choose>
+				<when test="trainingProgressParam == 'ongoing'">
+					and T.TRAINING_TIME_START &lt;= #{now,jdbcType=TIMESTAMP}
+		    		and T.TRAINING_TIME_END &gt;= #{now,jdbcType=TIMESTAMP}
+				</when>
+				<when test="trainingProgressParam == 'beforeStart'">
+					and T.TRAINING_TIME_START &gt; #{now,jdbcType=TIMESTAMP}
+				</when>
+				<when test="trainingProgressParam == 'afterEnd'">
+					and T.TRAINING_TIME_END &lt; #{now,jdbcType=TIMESTAMP}
+				</when>
+			</choose>
+		</if>
+		<if test="registerProgressParam != null and registerProgressParam != ''">
+			<choose>
+				<when test="registerProgressParam == 'ongoing'">
+					and T.REGISTER_TIME_START &lt;= #{now,jdbcType=TIMESTAMP}
+		    		and T.REGISTER_TIME_END &gt;= #{now,jdbcType=TIMESTAMP}
+				</when>
+				<when test="registerProgressParam == 'beforeStart'">
+					and T.REGISTER_TIME_START &gt; #{now,jdbcType=TIMESTAMP}
+				</when>
+				<when test="registerProgressParam == 'afterEnd'">
+					and T.REGISTER_TIME_END &lt; #{now,jdbcType=TIMESTAMP}
+				</when>
+			</choose>
+		</if>
+		<if test="electivesProgressParam != null and electivesProgressParam != ''">
+			<choose>
+				<when test="electivesProgressParam == 'ongoing'">
+					and T.ELECTIVES_TIME_START &lt;= #{now,jdbcType=TIMESTAMP}
+		    		and T.ELECTIVES_TIME_END &gt;= #{now,jdbcType=TIMESTAMP}
+				</when>
+				<when test="electivesProgressParam == 'beforeStart'">
+					and T.ELECTIVES_TIME_START &gt; #{now,jdbcType=TIMESTAMP}
+				</when>
+				<when test="electivesProgressParam == 'afterEnd'">
+					and T.ELECTIVES_TIME_END &lt; #{now,jdbcType=TIMESTAMP}
+				</when>
+			</choose>
+		</if> -->
+	</select>
+	<insert id="insert" parameterType="com.haoyu.tip.train.entity.Train">
+		insert into TRAIN
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				ID,
+			</if>
+			<if test="project!=null and project.id != null">
+				PROJECT_ID,
+			</if>
+			<if test="name != null">
+				NAME,
+			</if>
+			<if test="description != null">
+				DESCRIPTION,
+			</if>
+			<if test="state != null">
+				STATE,
+			</if>
+			<if test="type != null">
+				TYPE,
+			</if>
+			<if test="studyHoursType != null">
+				STUDY_HOURS_TYPE,
+			</if>
+			<if test="target != null">
+				TARGET,
+			</if>
+			<if test="studyHours != null">
+				STUDY_HOURS,
+			</if>
+			<if test="price != null">
+				PRICE,
+			</if>
+			<if test="chargeType != null">
+				CHARGE_TYPE,
+			</if>
+			<if test="trainingTime != null and trainingTime.startTime != null">
+				TRAINING_TIME_START,
+			</if>
+			<if test="trainingTime != null and trainingTime.endTime != null">
+				TRAINING_TIME_END,
+			</if>
+			<if test="registerTime != null and registerTime.startTime != null">
+				REGISTER_TIME_START,
+			</if>
+			<if test="registerTime != null and registerTime.endTime != null">
+				REGISTER_TIME_END,
+			</if>
+			<if test="electivesTime != null and electivesTime.startTime != null">
+				ELECTIVES_TIME_START,
+			</if>
+			<if test="electivesTime != null and electivesTime.endTime != null">
+				ELECTIVES_TIME_END,
+			</if>
+			<if test="registerNum != null">
+				REGISTER_NUM,
+			</if>
+			<if test="electivesNum != null">
+				ELECTIVES_NUM,
+			</if>
+			<if test="creator != null and creator.id != null">
+				CREATOR,
+			</if>
+			<if test="createTime != null">
+				CREATE_TIME,
+			</if>
+			<if test="updatedby != null">
+				UPDATEDBY,
+			</if>
+			<if test="updateTime != null">
+				UPDATE_TIME,
+			</if>
+			<if test="version != null">
+				VERSION,
+			</if>
+			<if test="isDeleted != null">
+				IS_DELETED,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType = VARCHAR},
+			</if>
+			<if test="project!=null and project.id != null">
+				#{project.id,jdbcType = VARCHAR},
+			</if>
+			<if test="name != null">
+				#{name,jdbcType = VARCHAR},
+			</if>
+			<if test="description != null">
+				#{description,jdbcType = VARCHAR},
+			</if>
+			<if test="state != null">
+				#{state,jdbcType = VARCHAR},
+			</if>
+			<if test="type != null">
+				#{type,jdbcType = VARCHAR},
+			</if>
+			<if test="studyHoursType != null">
+				#{studyHoursType,jdbcType = VARCHAR},
+			</if>
+			<if test="target != null">
+				#{target,jdbcType=VARCHAR},
+			</if>
+			<if test="studyHours != null">
+				#{studyHours,jdbcType=DECIMAL},
+			</if>
+			<if test="price != null">
+				#{price,jdbcType=DECIMAL},
+			</if>
+			<if test="chargeType != null">
+				#{chargeType,jdbcType=VARCHAR},
+			</if>
+			<if test="trainingTime != null and trainingTime.startTime != null">
+				#{trainingTime.startTime},
+			</if>
+			<if test="trainingTime != null and trainingTime.endTime != null">
+				#{trainingTime.endTime},
+			</if>
+			<if test="registerTime != null and registerTime.startTime != null">
+				#{registerTime.startTime},
+			</if>
+			<if test="registerTime != null and registerTime.endTime != null">
+				#{registerTime.endTime},
+			</if>
+			<if test="electivesTime != null and electivesTime.startTime != null">
+				#{electivesTime.startTime},
+			</if>
+			<if test="electivesTime != null and electivesTime.endTime != null">
+				#{electivesTime.endTime},
+			</if>
+			<if test="registerNum != null">
+				#{registerNum,jdbcType = INTEGER},
+			</if>
+			<if test="electivesNum != null">
+				#{electivesNum,jdbcType = INTEGER},
+			</if>
+			<if test="creator != null">
+				#{creator.id,jdbcType=VARCHAR},
+			</if>
+			<if test="createTime != null">
+				#{createTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="updatedby != null">
+				#{updatedby,jdbcType=VARCHAR},
+			</if>
+			<if test="updateTime != null">
+				#{updateTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="version != null">
+				#{version,jdbcType=DECIMAL},
+			</if>
+			<if test="isDeleted != null">
+				#{isDeleted,jdbcType=CHAR},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKey" parameterType="com.haoyu.tip.train.entity.Train">
+		update TRAIN
+		<set>
+			<if test="name != null and name!=''">
+				NAME = #{name,jdbcType=VARCHAR},
+			</if>
+			<if test="description != null and description != ''">
+				DESCRIPTION = #{description,jdbcType = VARCHAR},
+			</if>
+			<if test="state != null and state!=''">
+				STATE = #{state,jdbcType=VARCHAR},
+			</if>
+			<if test="type != null and type!=''">
+				TYPE = #{type,jdbcType=VARCHAR},
+			</if>
+			<if test="studyHoursType != null">
+				STUDY_HOURS_TYPE = #{studyHoursType,jdbcType = VARCHAR},
+			</if>
+			<if test="target != null and target!=''">
+				TARGET = #{target,jdbcType=VARCHAR},
+			</if>
+			<if test="project != null and project.id != null and project.id != ''">
+				PROJECT_ID = #{project.id,jdbcType=VARCHAR},
+			</if>
+			<if test="trainingTime != null and trainingTime.startTime != null">
+				TRAINING_TIME_START = #{trainingTime.startTime},
+			</if>
+			<if test="trainingTime != null and trainingTime.endTime != null">
+				TRAINING_TIME_END = #{trainingTime.endTime},
+			</if>
+			<if test="registerTime != null and registerTime.startTime != null">
+				REGISTER_TIME_START = #{registerTime.startTime},
+			</if>
+			<if test="registerTime != null and registerTime.endTime != null">
+				REGISTER_TIME_END = #{registerTime.endTime},
+			</if>
+			<if test="electivesTime != null and electivesTime.startTime != null">
+				ELECTIVES_TIME_START = #{electivesTime.startTime},
+			</if>
+			<if test="electivesTime != null and electivesTime.endTime != null">
+				ELECTIVES_TIME_END = #{electivesTime.endTime},
+			</if>
+			<if test="updatedby != null">
+				UPDATEDBY = #{updatedby.id,jdbcType=VARCHAR},
+			</if>
+			<if test="updateTime != null">
+				UPDATE_TIME = #{updateTime,jdbcType=BIGINT},
+			</if>
+			VERSION = VERSION+1
+		</set>
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<delete id="deleteByPhysics" parameterType="java.lang.String">
+		delete TRAIN
+		where ID=#{id,jdbcType=VARCHAR}
+	</delete>
+	<update id="deleteByLogic" parameterType="map">
+		update TRAIN
+		set IS_DELETED='Y',
+		<if test="entity != null and entity.updatedby != null">
+			UPDATEDBY = #{entity.updatedby.id,jdbcType=VARCHAR},
+		</if>
+		<if test="entity != null and entity.updateTime != null">
+			UPDATE_TIME = #{entity.updateTime,jdbcType=BIGINT},
+		</if>
+		VERSION=VERSION+1
+		where
+		<choose>
+			<when test="ids!=null">
+				ID in <foreach collection="ids" open="(" close=")" separator="," item="item">
+					#{item,jdbcType=VARCHAR}
+				</foreach>
+			</when>
+			<when test="entity!= null and entity.project !=null and entity.project.id != ''">
+				PROJECT_ID = #{entity.project.id,jdbcType=VARCHAR}
+			</when>
+		</choose>
+	</update>
+</mapper>

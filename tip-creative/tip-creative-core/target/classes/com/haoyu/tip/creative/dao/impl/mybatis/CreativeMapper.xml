@@ -1,0 +1,518 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.haoyu.tip.creative.dao.impl.mybatis.CreativeMapper">
+    
+	<resultMap id="BaseResultMap" type="com.haoyu.tip.creative.entity.Creative">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="TITLE" property="title" jdbcType="VARCHAR" />
+		<result column="CONTENT" property="content" jdbcType="VARCHAR" />
+		<result column="TYPE" property="type" jdbcType="VARCHAR" />
+		<result column="STAGE" property="stage" jdbcType="VARCHAR" />
+		<result column="SUBJECT" property="subject" jdbcType="VARCHAR" />
+		<result column="GRADE" property="grade" jdbcType="VARCHAR" />
+		<result column="STATE" property="state" jdbcType="VARCHAR" />
+		<result column="CREATOR" property="creator.id" jdbcType="VARCHAR" />
+		<result column="CREATOR_REAL_NAME" property="creator.realName" jdbcType="VARCHAR" />
+		<result column="CREATOR_AVATAR" property="creator.avatar" jdbcType="VARCHAR" />
+		<result column="CREATE_TIME" property="createTime" jdbcType="INTEGER" />
+		<result column="CLAIM_TYPE" property="claimType" jdbcType="VARCHAR" />
+		<result column="CLAIM_STATE" property="claimState" jdbcType="VARCHAR" />
+		<result column="CLAIM_ROLE" property="claimRole" jdbcType="VARCHAR" />
+		<result column="CLAIM_CREATOR_REAL_NAME" property="creativeUser.user.realName" jdbcType="VARCHAR" />
+		<collection property="creativeRelations" ofType="com.haoyu.tip.creative.entity.CreativeRelation">
+			<id column="CREATIVE_RELATION_ID" property="id" jdbcType="VARCHAR"/>
+			<result column="RELATION_ID" property="relation.id" jdbcType="VARCHAR" />
+			<result column="RELATION_TYPE" property="relation.type" jdbcType="VARCHAR" />
+			<result column="BROWSE_NUM" property="browseNum" jdbcType="INTEGER" />
+			<result column="PARTICIPATE_NUM" property="participateNum" jdbcType="INTEGER" />
+			<result column="SUPPORT_NUM" property="supportNum" jdbcType="INTEGER" />
+			<result column="COLLECT_DAYS" property="collectDays" jdbcType="INTEGER" />
+			<result column="COLLECT_START_TIME" property="collectTimePeriod.startTime" jdbcType="TIMESTAMP" />
+			<result column="COLLECT_END_TIME" property="collectTimePeriod.endTime" jdbcType="TIMESTAMP" />
+		</collection>
+	</resultMap>
+
+	<resultMap type="map" id="AdviceUserNumMap">
+		<result column="CREATIVE_ID" property="creativeId" jdbcType="VARCHAR"  />
+		<result column="COUNT" property="count" jdbcType="INTEGER"  />
+	</resultMap>
+	
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String">
+		select
+			C.ID,
+			C.TITLE,
+			C.CONTENT,
+			C.TYPE,
+			C.STAGE,
+			C.SUBJECT,
+			C.GRADE,
+			C.STATE,
+			C.CREATE_TIME,
+			C.CREATOR,
+			C.CLAIM_TYPE,
+			C.CLAIM_STATE,
+			C.CLAIM_ROLE,
+			BUV.REAL_NAME CREATOR_REAL_NAME,
+			BUV.AVATAR CREATOR_AVATAR,
+			CRN.BROWSE_NUM,
+			CRN.SUPPORT_NUM,
+			CRN.PARTICIPATE_NUM,
+			CRN.COLLECT_DAYS,
+			CRN.ID CREATIVE_RELATION_ID,
+			CRN.COLLECT_START_TIME COLLECT_START_TIME ,
+			CRN.COLLECT_END_TIME COLLECT_END_TIME
+		from 
+			CREATIVE C
+		inner join CREATIVE_RELATION CRN on CRN.CREATIVE_ID = C.ID and CRN.IS_DELETED = 'N'
+		inner join BASE_USER_VIEW BUV on BUV.ID = C.CREATOR
+		where 
+			C.IS_DELETED = 'N' and C.ID = #{id,jdbcType=VARCHAR}
+	</select>
+
+	<select id="selectByParameter" parameterType="java.util.Map" resultMap="BaseResultMap">
+		select
+			C.ID,
+			C.TITLE,
+			C.CONTENT,
+			C.TYPE,
+			C.STAGE,
+			C.SUBJECT,
+			C.GRADE,
+			C.STATE,
+			C.CREATE_TIME,
+			C.CREATOR,
+			C.CLAIM_TYPE,
+			C.CLAIM_STATE,
+			C.CLAIM_ROLE,
+			BUV.REAL_NAME CREATOR_REAL_NAME,
+			BUV.AVATAR CREATOR_AVATAR,
+			CRN.BROWSE_NUM,
+			CRN.SUPPORT_NUM,
+			CRN.PARTICIPATE_NUM,
+			CRN.COLLECT_DAYS,
+			CRN.ID CREATIVE_RELATION_ID,
+			CRN.COLLECT_START_TIME COLLECT_START_TIME ,
+			CRN.COLLECT_END_TIME COLLECT_END_TIME,
+			S.DAYS TOP_DAYS,
+			BUV1.REAL_NAME CLAIM_CREATOR_REAL_NAME
+		from 
+			CREATIVE C
+		inner join CREATIVE_RELATION CRN on CRN.CREATIVE_ID = C.ID and CRN.IS_DELETED = 'N'
+		inner join BASE_USER_VIEW BUV on BUV.ID = C.CREATOR
+		left join STATUS S on S.RELATION_ID = C.ID and S.RELATION_TYPE = 'creative' and S.STATE = 'top'
+		left join CREATIVE_USER CU on CU.IS_DELETED = 'N' and CU.CREATIVE_ID = C.ID 
+		left join BASE_USER_VIEW BUV1 on BUV1.ID = CU.USER_ID
+		where 
+			C.IS_DELETED = 'N'
+		<if test="title != null and title != '' ">
+		    and C.TITLE like '%${title}%'
+	    </if>
+		<if test="type != null and type != '' ">
+		    and C.TYPE = #{type,jdbcType=VARCHAR} 
+	    </if>
+	    <if test="types != null and types.size > 0">
+		    and C.TYPE in
+		    <foreach collection="types" open="(" close=")" item="type" separator=",">
+				#{type}
+			</foreach>
+		</if>
+		<if test="states != null and states.size > 0">
+		    and C.STATE in
+		    <foreach collection="states" open="(" close=")" item="state" separator=",">
+				#{state}
+			</foreach>
+		</if>
+		<if test="creatorId != null and creatorId != '' ">
+		    and C.CREATOR = #{creatorId,jdbcType=VARCHAR} 
+	    </if>
+	    <if test="userId != null and userId != '' ">
+		    and CU.USER_ID = #{userId,jdbcType=VARCHAR} 
+	    </if>
+	    <if test="role != null and role != '' ">
+		    and CU.ROLE = #{role,jdbcType=VARCHAR} 
+	    </if>
+	    <if test="relationId != null and relationId != ''">
+			and CRN.RELATION_ID = #{relationId,jdbcType=VARCHAR}
+		</if>
+		<if test="relationType != null and relationType != ''">
+			and CRN.RELATION_TYPE = #{relationType,jdbcType=VARCHAR}
+		</if>
+		<if test="startTimeLessThan != null">
+			and CRN.COLLECT_START_TIME <![CDATA[<=]]>  #{startTimeLessThan,jdbcType=TIMESTAMP}
+		</if>
+		<if test="endTimeGreater != null">
+			and CRN.COLLECT_END_TIME <![CDATA[>]]>  #{endTimeGreater,jdbcType=TIMESTAMP}
+		</if>
+		<if test="endTimeLess != null">
+			and CRN.COLLECT_END_TIME <![CDATA[<]]>  #{endTimeLess,jdbcType=TIMESTAMP}
+		</if>
+		<if test="claimType != null and claimType != '' ">
+		    and C.CLAIM_TYPE = #{claimType,jdbcType=VARCHAR} 
+	    </if>
+	    <if test="ids != null and ids.size > 0">
+		    and C.ID in
+		    <foreach collection="ids" open="(" close=")" item="id" separator=",">
+				#{id}
+			</foreach>
+		</if>
+	</select>
+
+	<insert id="insert" parameterType="com.haoyu.tip.creative.entity.Creative">
+		insert into CREATIVE
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null and id != '' ">
+				ID,
+			</if>
+			<if test="title != null and title != '' ">
+			    TITLE,
+		   	</if>
+			<if test="content != null and content != '' ">
+			    CONTENT,
+		    </if>
+			<if test="type != null and type != '' ">
+			    TYPE,
+		    </if>
+			<if test="stage != null and stage != '' ">
+			    STAGE,
+		    </if>
+			<if test="subject != null and subject != '' ">
+			    SUBJECT,
+		    </if>
+			<if test="grade != null and grade != '' ">
+			    GRADE,
+		    </if>
+			<if test="state != null and state != '' ">
+			    STATE,
+		    </if>
+		    <if test="claimType != null and claimType != '' ">
+			    CLAIM_TYPE,
+		    </if>
+		    <if test="claimState != null and claimState != '' ">
+			    CLAIM_STATE,
+		    </if>
+		    <if test="claimRole != null and claimRole != '' ">
+			    CLAIM_ROLE,
+		    </if>
+			<if test="creator != null and creator.id != null and creator.id != '' ">
+			    CREATOR,
+		    </if>
+			<if test="createTime != null and createTime > 0">
+			    CREATE_TIME,
+		    </if>
+			<if test="version != null">
+			    VERSION,
+		    </if>
+			<if test="isDeleted != null">
+			    IS_DELETED,
+		    </if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null and id != '' ">
+			    #{id,jdbcType=VARCHAR},
+		    </if>
+			<if test="title != null and title != '' ">
+			    #{title,jdbcType=VARCHAR},
+		    </if>
+			<if test="content != null and content != '' ">
+			    #{content,jdbcType=LONGVARCHAR},
+		    </if>
+			<if test="type != null and type != '' ">
+			    #{type,jdbcType=VARCHAR},
+		    </if>
+			<if test="stage != null and stage != '' ">
+			    #{stage,jdbcType=VARCHAR},
+		    </if>
+			<if test="subject != null and subject != '' ">
+			    #{subject,jdbcType=VARCHAR},
+		    </if>
+			<if test="grade != null and grade != '' ">
+			    #{grade,jdbcType=VARCHAR},
+		    </if>
+			<if test="state != null and state != '' ">
+			    #{state,jdbcType=VARCHAR},
+		    </if>
+		    <if test="claimType != null and claimType != '' ">
+			     #{claimType,jdbcType=VARCHAR},
+		    </if>
+		    <if test="claimState != null and claimState != '' ">
+			     #{claimState,jdbcType=VARCHAR},
+		    </if>
+		    <if test="claimRole != null and claimRole != '' ">
+			     #{claimRole,jdbcType=VARCHAR},
+		    </if>
+			<if test="creator != null and creator.id != null and creator.id != '' ">
+			    #{creator.id,jdbcType=VARCHAR},
+		    </if>
+			<if test="createTime != null and createTime > 0">
+			    #{createTime,jdbcType=BIGINT},
+		    </if>
+			<if test="version != null">
+			    #{version,jdbcType=DECIMAL},
+		    </if>
+			<if test="isDeleted != null">
+			    #{isDeleted,jdbcType=VARCHAR},
+		    </if>
+		</trim>
+	</insert>
+	
+	<update id="updateByPrimaryKey" parameterType="com.haoyu.tip.creative.entity.Creative">
+	    update CREATIVE 
+	    <set>
+			<if test="title != null and title != '' ">
+			    TITLE = #{title,jdbcType=VARCHAR},
+		   	</if>
+			<if test="content != null and content != '' ">
+			    CONTENT = #{content,jdbcType=LONGVARCHAR},
+		    </if>
+			<if test="type != null and type != '' ">
+			    TYPE = #{type,jdbcType=VARCHAR},
+		    </if>
+			<if test="stage != null and stage != '' ">
+			    STAGE = #{stage,jdbcType=VARCHAR},
+		    </if>
+			<if test="subject != null and subject != '' ">
+			    SUBJECT = #{subject,jdbcType=VARCHAR},
+		    </if>
+			<if test="grade != null and grade != '' ">
+			    GRADE = #{grade,jdbcType=VARCHAR},
+		    </if>
+			<if test="state != null and state != '' ">
+			    STATE = #{state,jdbcType=VARCHAR},
+		    </if>
+		    <if test="claimState != null and claimState != '' ">
+			    CLAIM_STATE = #{claimState,jdbcType=VARCHAR},
+		    </if>
+		</set>
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	
+	<update id="deleteByLogic" parameterType="com.haoyu.tip.creative.entity.Creative">
+	    update CREATIVE
+		set IS_DELETED = 'Y', UPDATE_TIME = #{updateTime,jdbcType=DECIMAL}
+		<if test="updatedby != null and updatedby.id != null and updatedby.id != ''">
+			,UPDATEDBY = #{updatedby.id,jdbcType=VARCHAR}
+		</if>
+		,VERSION = VERSION + 1
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	
+	<select id="getCount" resultType="int" parameterType="map">
+		select 
+			count(C.ID)
+		from 
+			CREATIVE C
+		left join CREATIVE_RELATION CRN on CRN.CREATIVE_ID = C.ID and CRN.IS_DELETED = 'N'
+		left join CREATIVE_USER CU on CU.IS_DELETED = 'N' and CU.CREATIVE_ID = C.ID
+		where 
+			C.IS_DELETED = 'N'
+		<if test="states != null and states.size > 0">
+		    and C.STATE in
+		    <foreach collection="states" open="(" close=")" item="state" separator=",">
+				#{state}
+			</foreach>
+		</if>
+		<if test="creator != null and creator != ''">
+			and C.CREATOR = #{creator,jdbcType=VARCHAR}
+		</if>
+		<if test="userId != null and userId != ''">
+			and CU.USER_ID = #{userId,jdbcType=VARCHAR}
+		</if>
+		<if test="relationId != null and relationId != ''">
+			and CRN.RELATION_ID = #{relationId,jdbcType=VARCHAR}
+		</if>
+		<if test="relationType != null and relationType != ''">
+			and CRN.RELATION_TYPE = #{relationType,jdbcType=VARCHAR}
+		</if>
+		<if test="type != null and type != ''">
+			and C.TYPE = #{type,jdbcType=VARCHAR}
+		</if>
+		<if test="startTimeLessThan != null">
+			and CRN.COLLECT_START_TIME <![CDATA[<=]]>  #{startTimeLessThan,jdbcType=TIMESTAMP}
+		</if>
+		<if test="endTimeGreater != null">
+			and CRN.COLLECT_END_TIME <![CDATA[>]]>  #{endTimeGreater,jdbcType=TIMESTAMP}
+		</if>
+		<if test="endTimeLess != null">
+			and CRN.COLLECT_END_TIME <![CDATA[<]]>  #{endTimeLess,jdbcType=TIMESTAMP}
+		</if>
+	</select>
+	
+	<select id="selectByOp" resultMap="BaseResultMap" parameterType="map">
+	    select
+	    	C.ID,
+			C.TITLE,
+			C.CONTENT,
+			C.TYPE,
+			C.STAGE,
+			C.SUBJECT,
+			C.GRADE,
+			C.STATE,
+			C.CREATE_TIME,
+			C.CREATOR,
+			CRN.BROWSE_NUM
+	    from
+	    	CREATIVE C
+		inner join CREATIVE_RELATION CRN on CRN.CREATIVE_ID = C.ID and CRN.IS_DELETED = 'N'
+		inner join BASE_USER_VIEW BUV on BUV.ID = C.CREATOR
+	    where 
+			C.IS_DELETED = 'N'
+		<if test="type != null and type != ''">
+			and C.TYPE = #{type,jdbcType=VARCHAR}
+		</if>
+		<if test="relationId != null and relationId != ''">
+			and CRN.RELATION_ID = #{relationId,jdbcType=VARCHAR}
+		</if>
+		<if test="relationType != null and relationType != ''">
+			and CRN.RELATION_TYPE = #{relationType,jdbcType=VARCHAR}
+		</if>
+		<if test="id != null and id != ''">
+			<if test="op == 'createTimeGt'.toString()">
+				and C.CREATE_TIME <![CDATA[>]]> (select CREATE_TIME from CREATIVE where ID = #{id}) ORDER BY C.CREATE_TIME 
+			</if>
+			<if test="op == 'createTimeLt'.toString()">
+				and C.CREATE_TIME <![CDATA[<]]> (select CREATE_TIME from CREATIVE where ID = #{id}) ORDER BY C.CREATE_TIME DESC 
+			</if>
+		</if>
+	</select> 
+	
+	<select id="selectByResourceId" parameterType="java.lang.String" resultMap="BaseResultMap">
+	    select
+			C.ID,
+			C.TITLE,
+			C.CONTENT,
+			C.TYPE,
+			C.STAGE,
+			C.SUBJECT,
+			C.GRADE,
+			C.STATE,
+			C.CREATE_TIME,
+			C.CREATOR,
+			C.CLAIM_TYPE,
+			C.CLAIM_STATE,
+			C.CLAIM_ROLE,
+			BUV.REAL_NAME CREATOR_REAL_NAME,
+			BUV.AVATAR CREATOR_AVATAR,
+			CRN.BROWSE_NUM,
+			CRN.SUPPORT_NUM,
+			CRN.PARTICIPATE_NUM,
+			CRN.COLLECT_DAYS,
+			CRN.ID CREATIVE_RELATION_ID,
+			CRN.COLLECT_START_TIME COLLECT_START_TIME ,
+			CRN.COLLECT_END_TIME COLLECT_END_TIME
+		from
+			CREATIVE C
+		inner join CREATIVE_RELATION CRN on CRN.CREATIVE_ID = C.ID and CRN.IS_DELETED = 'N'
+		inner join BASE_USER_VIEW BUV on BUV.ID = C.CREATOR
+		where
+			C.IS_DELETED = 'N'
+			and exists(select 1 from RESOURCE_RELATION RNN where RNN.IS_DELETED = 'N' and RNN.RELATION_ID = C.ID and RNN.RESOURCE_ID = #{resourceId,jdbcType=VARCHAR})
+	</select>
+	
+	<update id="batchUpdate" parameterType="map">
+	    update CREATIVE 
+	    <set>
+			<if test="title != null and title != '' ">
+			    TITLE = #{title,jdbcType=VARCHAR},
+		   	</if>
+			<if test="content != null and content != '' ">
+			    CONTENT = #{content,jdbcType=LONGVARCHAR},
+		    </if>
+			<if test="type != null and type != '' ">
+			    TYPE = #{type,jdbcType=VARCHAR},
+		    </if>
+			<if test="stage != null and stage != '' ">
+			    STAGE = #{stage,jdbcType=VARCHAR},
+		    </if>
+			<if test="subject != null and subject != '' ">
+			    SUBJECT = #{subject,jdbcType=VARCHAR},
+		    </if>
+			<if test="grade != null and grade != '' ">
+			    GRADE = #{grade,jdbcType=VARCHAR},
+		    </if>
+			<if test="state != null and state != '' ">
+			    STATE = #{state,jdbcType=VARCHAR},
+		    </if>
+		    <if test="claimState != null and claimState != '' ">
+			    CLAIM_STATE = #{claimState,jdbcType=VARCHAR},
+		    </if>
+		</set>
+		<if test="ids != null and ids.size > 0">
+			where ID in
+			<foreach collection="ids" open="(" close=")" item="id" separator=",">
+		  		#{id,jdbcType=VARCHAR}  	
+		  	</foreach>
+		</if>
+	</update>
+	
+	<update id="batchDelete" parameterType="map">
+	    update
+			CREATIVE
+		set 
+			IS_DELETED = 'Y', 
+			UPDATE_TIME = #{updateTime,jdbcType=DECIMAL}
+			<if test="updatedbyId != null and updatedbyId != ''">
+				,UPDATEDBY = #{updatedby.id,jdbcType=VARCHAR}
+			</if>
+			,VERSION = VERSION + 1
+			<if test="ids != null and ids.size > 0">
+		    	where ID in
+				<foreach collection="ids" open="(" close=")" item="id" separator=",">
+			  		#{id,jdbcType=VARCHAR}  	
+			  	</foreach>
+			</if>
+	</update>
+	
+	<select id="getAdviceUserNum" resultMap="AdviceUserNumMap" >
+		select
+			C.RELATION_ID CREATIVE_ID,
+			COUNT(DISTINCT BUV.ID) COUNT
+		from
+			BASE_USER_VIEW BUV
+		inner join COMMENTS C on C.IS_DELETED = 'N' and C.CREATOR = BUV.ID 
+		<if test="creativeIds != null and creativeIds.size > 0">
+		    and C.RELATION_ID in
+			<foreach collection="creativeIds" open="(" close=")" item="creativeId" separator=",">
+			    #{creativeId,jdbcType=VARCHAR}
+			</foreach>
+		</if>
+		group by 
+			C.RELATION_ID
+	</select>
+	
+	<select id="getResourceCount" resultType="int" parameterType="map">
+		select
+			count (R.ID)
+		from
+			RESOURCES R
+		inner join RESOURCE_RELATION RRN on RRN.RESOURCE_ID = R.ID and RRN.IS_DELETED = 'N'
+		where
+			R.IS_DELETED = 'N'
+		<if test="relationId != null and relationId != ''">
+			and RRN.RELATION_ID = #{relationId,jdbcType=VARCHAR}
+		</if>
+		<if test="relationType != null and relationType != ''">
+			and RRN.TYPE = #{relationType,jdbcType=VARCHAR}
+		</if>
+	</select>
+	
+	<select id="getResourceCreatorCount" resultType="int" parameterType="map">
+		select
+			count (BUV.ID)
+		from
+			BASE_USER_VIEW BUV
+		where
+			BUV.ID in 
+			(
+				select
+					R.CREATOR
+				from
+					RESOURCES R
+				inner join RESOURCE_RELATION RRN on RRN.RESOURCE_ID = R.ID and RRN.IS_DELETED = 'N'
+				where
+					R.IS_DELETED = 'N'
+					and RRN.RELATION_ID = #{relationId,jdbcType=VARCHAR}
+					and RRN.TYPE = #{relationType,jdbcType=VARCHAR}
+			)
+		
+	</select>
+</mapper>

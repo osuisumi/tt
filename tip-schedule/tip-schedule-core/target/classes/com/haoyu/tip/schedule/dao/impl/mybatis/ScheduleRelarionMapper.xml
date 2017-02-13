@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.haoyu.tip.schedule.dao.impl.mybatis.ScheduleRelationMapper">
+	<resultMap id="ScheduleRelationResultMap" type="com.haoyu.tip.schedule.entity.ScheduleRelation">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+	</resultMap>
+	<insert id="insert" parameterType="com.haoyu.tip.schedule.entity.Schedule">
+		insert into SCHEDULE_RELATION
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				ID,
+			</if>
+			<if test="schedule!=null and schedule.id != null">
+				SCHEDULE_ID,
+			</if>
+			<if test="relation != null and relation.id != null">
+				RELATION_ID,
+			</if>
+			<if test="relation != null and relation.type != null">
+				RELATION_TYPE,
+			</if>
+			<if test="timePeriod != null and timePeriod.startTime != null">
+				START_TIME,
+			</if>
+			<if test="timePeriod != null and timePeriod.endTime != null">
+				END_TIME,
+			</if>
+			<if test="creator != null and creator.id != null">
+				CREATOR,
+			</if>
+			<if test="createTime != null">
+				CREATE_TIME,
+			</if>
+			<if test="updatedby != null">
+				UPDATEDBY,
+			</if>
+			<if test="updateTime != null">
+				UPDATE_TIME,
+			</if>
+			<if test="version != null">
+				VERSION,
+			</if>
+			<if test="isDeleted != null">
+				IS_DELETED,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType = VARCHAR},
+			</if>
+			<if test="schedule!=null and schedule.id != null">
+				#{schedule.id,jdbcType = VARCHAR},
+			</if>
+			<if test="relation!=null and relation.id != null">
+				#{relation.id,jdbcType = VARCHAR},
+			</if>
+			<if test="relation != null and relation.type != null">
+				#{relation.type,jdbcType = VARCHAR},
+			</if>
+			<if test="timePeriod != null and timePeriod.startTime != null">
+				#{timePeriod.startTime},
+			</if>
+			<if test="timePeriod != null and timePeriod.endTime != null">
+				#{timePeriod.endTime},
+			</if>
+			<if test="creator != null and creator.id != null">
+				#{creator.id,jdbcType=VARCHAR},
+			</if>
+			<if test="createTime != null">
+				#{createTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="updatedby != null">
+				#{updatedby,jdbcType=VARCHAR},
+			</if>
+			<if test="updateTime != null">
+				#{updateTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="version != null">
+				#{version,jdbcType=DECIMAL},
+			</if>
+			<if test="isDeleted != null">
+				#{isDeleted,jdbcType=CHAR},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKey" parameterType="com.haoyu.tip.schedule.entity.Schedule">
+		update SCHEDULE_RELATION
+		<set>
+			<if test="timePeriod != null and timePeriod.startTime!=''">
+				START_TIME = #{timePeriod.startTime,jdbcType=VARCHAR},
+			</if>
+			<if test="timePeriod != null and timePeriod.endTime!=''">
+				END_TIME = #{timePeriod.endTime,jdbcType=VARCHAR},
+			</if>
+			<if test="updatedby != null">
+				UPDATEDBY = #{updatedby.id,jdbcType=VARCHAR},
+			</if>
+			<if test="updateTime != null">
+				UPDATE_TIME = #{updateTime,jdbcType=BIGINT},
+			</if>
+			VERSION = VERSION+1
+		</set>
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<delete id="deleteByPhysics" parameterType="java.lang.String">
+		delete SCHEDULE_RELATION
+		where ID=#{id,jdbcType=VARCHAR}
+	</delete>
+	<update id="deleteByLogic" parameterType="com.haoyu.tip.schedule.entity.Schedule">
+		update SCHEDULE_RELATION
+		set IS_DELETED='Y',
+		<if test="updatedby != null">
+			UPDATEDBY = #{updatedby.id,jdbcType=VARCHAR},
+		</if>
+		<if test="updateTime != null">
+			UPDATE_TIME = #{updateTime,jdbcType=BIGINT},
+		</if>
+		VERSION=VERSION+1
+		where
+		<choose>
+			<when test="id != null and id != ''">
+				ID=#{id,jdbcType=VARCHAR}
+			</when>
+			<otherwise>
+				SCHEDULE_ID = #{schedule.id,jdbcType=VARCHAR}
+			</otherwise>
+		</choose>
+	</update>
+</mapper>

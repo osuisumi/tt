@@ -1,0 +1,17 @@
+com\haoyu\tip\livestudio\service\impl\LiveStudioUserServiceImpl.class
+com\haoyu\tip\livestudio\dao\ILiveStudioUserDao.class
+com\haoyu\base\entity\BaseEntity.class
+com\haoyu\tip\livestudio\dao\impl\mybatis\LiveStudioUserDao.class
+com\haoyu\tip\livestudio\service\ILiveStudioService.class
+com\haoyu\tip\livestudio\entity\LiveStudio.class
+com\haoyu\base\utils\BaseServiceUtils.class
+com\haoyu\tip\livestudio\entity\LiveStudioUser.class
+com\haoyu\tip\livestudio\service\impl\LiveStudioRelationService.class
+com\haoyu\tip\livestudio\dao\ILiveStudioRelationDao.class
+com\haoyu\tip\livestudio\dao\ILiveStudioDao.class
+com\haoyu\tip\livestudio\service\impl\LiveStudioServiceImpl.class
+com\haoyu\tip\livestudio\dao\impl\mybatis\LiveStudioDao.class
+com\haoyu\tip\livestudio\service\ILiveStudioRelationService.class
+com\haoyu\tip\livestudio\service\ILiveStudioUserService.class
+com\haoyu\tip\livestudio\entity\LiveStudioRelation.class
+com\haoyu\tip\livestudio\dao\impl\mybatis\LiveStudioRelationDao.class

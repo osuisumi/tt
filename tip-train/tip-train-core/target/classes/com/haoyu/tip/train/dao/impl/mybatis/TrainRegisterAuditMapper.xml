@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.haoyu.tip.train.dao.impl.mybatis.TrainRegisterAuditMapper" >
+  <resultMap id="TrainRegisterAuditMap" type="com.haoyu.tip.train.entity.TrainRegisterAudit" >
+    <id column="ID" property="id" jdbcType="VARCHAR" />
+    <result column="AUDIT_RESULT" property="auditResult" jdbcType="VARCHAR" />
+    <result column="AUDIT_OPIONION" property="auditOpinion" jdbcType="VARCHAR" />
+    <association property="trainRegister" javaType="com.haoyu.tip.train.entity.TrainRegister">
+    	<id column="TRAIN_REGISTER_ID" property="id" jdbcType = "VARCHAR"/>
+    	<association property="train" javaType="com.haoyu.tip.train.entity.Train">
+    		<id column="TRAIN_ID" property="id"/>
+    		<result column="TRAIN_NAME" property="name" jdbcType="VARCHAR"/>
+    		<result column="TRAIN_DESCRIPTION" property="description" jdbcType="VARCHAR"/>
+    	</association>
+    	<association property="user" javaType="com.haoyu.sip.core.entity.User">
+    		<id column="REGISTER_USER_ID" property="id" jdbcType="VARCHAR"></id>
+    		<result column="REGISTER_USER_REAL_NAME" property="realName" jdbcType="VARCHAR"/>
+    	</association>
+    </association>
+    <association property="auditUser" javaType="com.haoyu.sip.core.entity.User">
+    	<id column="AUDIT_USER_ID" property="id" jdbcType = "VARCHAR"/>
+    	<result column="AUDIT_USER_REAL_NAME" property="realName" jdbcType="VARCHAR"/>
+    </association>
+  </resultMap>
+  <sql id="Base_Column_List" >
+    TRA.ID,TRA.TRAIN_REGISTER_ID,TRA.AUDIT_RESULT,TRA.AUDIT_OPIONION,TRA.AUDIT_USER_ID,
+    TR.ID TRAIN_REGESTER_ID,
+    T.ID TRAIN_ID,T.NAME TRAIN_NAME,T.DESCRIPTION TRAIN_DESCRIPTION,
+    RBUV.ID REGISTER_USER_ID,RBUV.REAL_NAME REGISTER_REAL_NAME,
+    ABUV.ID AUDIT_USER_ID,ABUV.REAL_NAME AUDIT_REAL_NAME
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="TrainRegisterAuditMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List"/>
+    from TRAIN_REGISTER_AUDIT TRA
+    join TRAIN_REGISTER TR on TRA.TRAIN_REGISTER_ID = TR.ID
+    join TRAIN T on T.ID = TR.TRAIN_ID
+    join BASE_USER_VIEW RBUV on RBUV.ID = TR.USER_ID
+    join BASE_USER_VIEW ABUV on ABUV.ID = TRA.AUDIT_USER_ID
+    where TRA.IS_DELETED='N'
+    and TRA.ID=#{id,jdbcType=VARCHAR}
+  </select>
+  <select id="selectByParameter" resultMap="TrainRegisterAuditMap" parameterType="java.util.Map" >
+    select 
+    <include refid="Base_Column_List"/>
+    from TRAIN_REGISTER_AUDIT TRA
+    join TRAIN_REGISTER TR on TRA.TRAIN_REGISTER_ID = TR.ID
+    join TRAIN T on T.ID = TR.TRAIN_ID
+    join BASE_USER_VIEW RBUV on RBUV.ID = TR.USER_ID
+    join BASE_USER_VIEW ABUV on ABUV.ID = TRA.AUDIT_USER_ID
+    where TRA.IS_DELETED='N'
+    <if test="trainRegisterId !=null and trainRegisterId !=''">
+    	and TRA.TRAIN_REGISTER_ID = #{trainRegisterId,jdbcType=VARCHAR}  
+    </if>
+    <if test="auditResult != null and auditResult !=''">
+    	and TRA.AUDIT_RESULT = #{auditResult,jdbcType=VARCHAR}
+    </if>
+    <if test="auditOpinion != null and auditOpinion != ''">
+    	and TRA.AUDIT_OPTION = #{auditOpinion,jdbcType = VARCHAR}
+    </if>
+    <if test="auditUserId != null and auditUserId != ''">
+    	and TRA.AUDIT_USER_ID = #{auditUserId,jdbcType = VARCHAR}
+    </if>
+  </select>
+  <insert id="insert" parameterType="com.haoyu.tip.train.entity.TrainRegisterAudit">
+  	insert into TRAIN_REGISTER_AUDIT (ID,TRAIN_REGISTER_ID,AUDIT_RESULT,AUDIT_OPIONION,AUDIT_USER_ID,CREATOR,CREATE_TIME,IS_DELETED,VERSION)
+  	values(#{id,jdbcType=VARCHAR},#{trainRegister.id,jdbcType=VARCHAR},#{auditResult,jdbcType=VARCHAR},#{auditOpinion,jdbcType=VARCHAR},#{auditUser.id,jdbcType=VARCHAR},
+  	#{creator.id,jdbcType=VARCHAR},#{createTime,jdbcType=BIGINT},#{isDeleted,jdbcType=VARCHAR},#{version,jdbcType=DECIMAL})
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="com.haoyu.tip.train.entity.TrainRegisterAudit">
+  	update TRAIN_REGISTER_AUDIT
+  	<set >
+      <if test="auditResult != null and auditResult !=''" >
+        AUDIT_RESULT = #{auditResult,jdbcType=VARCHAR},
+      </if>
+      <if test="auditOpinion != null and auditOpinion!=''" >
+        AUDIT_OPTION = #{auditOpinion,jdbcType=VARCHAR},
+      </if>
+      <if test="updatedby != null" >
+        UPDATEDBY = #{updatedby.id,jdbcType=VARCHAR},
+      </if>
+      <if test="updateTime != null" >
+        UPDATE_TIME = #{updateTime,jdbcType=BIGINT},
+      </if>
+      VERSION = VERSION+1
+    </set>
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <delete id="deleteByPhysics" parameterType="java.lang.String">
+  	delete TRAIN_REGISTER_AUDIT
+    where ID=#{id,jdbcType=VARCHAR}
+  </delete>
+  <update id="deleteByLogic" parameterType="com.haoyu.tip.train.entity.TrainRegisterAudit">
+  	  update TRAIN_REGISTER_AUDIT
+  	  set IS_DELETED='Y',
+      <if test="updatedby != null" >
+        UPDATEDBY = #{updatedby.id,jdbcType=VARCHAR},
+      </if>
+      <if test="updateTime != null" >
+        UPDATE_TIME = #{updateTime,jdbcType=BIGINT},
+      </if>
+       VERSION=VERSION+1
+      where 
+      <choose>
+      	<when test="id!=null and id!=''">
+      		ID=#{id,jdbcType=VARCHAR}
+      	</when>
+      	<when test="trainRegister != null and trainRegister.id != null">
+      		TRAIN_REGISTER_ID = #{trainRegister.id,jdbcType=VARCHAR}
+      	</when>
+      	<when test="auditUser != null and auditUser.id != null">
+      		AUDIT_USER_ID = #{auditUser.id,jdbcType=VARCHAR}
+      	</when>
+      </choose>
+  </update>
+</mapper>

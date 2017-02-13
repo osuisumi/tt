@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.haoyu.tip.livestudio.dao.impl.mybatis.LiveStudioMapper">
+	<resultMap id="LiveStudioResultMap" type="com.haoyu.tip.livestudio.entity.LiveStudio">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="TITLE" property="title" jdbcType="VARCHAR" />
+		<result column="EXPERT_NAMES" property="expertNames" jdbcType="VARCHAR" />
+		<result property="startTime" column="START_TIME" jdbcType="TIMESTAMP" />
+		<result property="endTime" column="END_TIME" jdbcType="TIMESTAMP" />
+		<result column="DESCRIPTION" property="description" jdbcType="CLOB" />
+		<result column="NOW_NUM" property="nowNum" jdbcType="INTEGER" />
+		<result column="MAX_NUM" property="maxNum" jdbcType="INTEGER" />
+		<result column="CREATE_TIME" property="createTime" jdbcType="BIGINT" />
+		<result column="UPDATE_TIME" property="updateTime" jdbcType="BIGINT" />
+		<result column="VERSION" property="version" jdbcType="DECIMAL" />
+		<result column="IS_DELETED" property="isDeleted" jdbcType="CHAR" />
+		<collection property="liveStudioUsers" ofType="com.haoyu.tip.livestudio.entity.LiveStudioUser">
+			<id column="LIVE_STUDIO_USER_ID" property="id" />
+			<result column="LIVE_STUDIO_USER_ID" property="user.id" />
+			<result column="REAL_NAME" property="user.realName" />
+		</collection>
+	</resultMap>
+	<sql id="Base_Column_List">
+		ID,CREATOR,UPDATEDBY,CREATE_TIME,UPDATE_TIME,IS_DELETED,VERSION,TITLE,START_TIME,END_TIME,DESCRIPTION,NOW_NUM,MAX_NUM
+	</sql>
+
+	<select id="select" resultMap="LiveStudioResultMap" parameterType="java.util.Map">
+		SELECT LS.ID,LS.TITLE,LS.EXPERT_NAMES,LS.START_TIME,LS.END_TIME,LS.DESCRIPTION,LS.MAX_NUM,LS.NOW_NUM
+		,
+		LSU.LIVE_STUDIO_ID,LSU.USER_ID LIVE_STUDIO_USER_ID
+		FROM LIVE_STUDIO LS
+		LEFT JOIN LIVE_STUDIO_USER LSU ON LS.ID = LSU.LIVE_STUDIO_ID and LSU.IS_DELETED = 'N' and LSU.USER_ID=#{userId,jdbcType=VARCHAR}
+		join LIVE_STUDIO_RELATION LSR on LSR.LIVE_STUDIO_ID = LS.ID
+		where LS.IS_DELETED = 'N'
+		<if test="relationId!=null and relationId!=''">
+			and LSR.RELATION_ID=#{relationId}
+		</if>
+
+		order by LS.CREATE_TIME desc
+	</select>
+
+	<select id="getByPrimaryKey" parameterType="java.lang.String" resultMap="LiveStudioResultMap">
+		select LS.ID,LS.TITLE,LS.EXPERT_NAMES,LS.START_TIME,LS.END_TIME,LS.DESCRIPTION,LS.MAX_NUM,LS.NOW_NUM
+		from LIVE_STUDIO LS
+		where LS.IS_DELETED='N'
+		and LS.ID=#{id,jdbcType=VARCHAR}
+	</select>
+
+
+	<update id="updateNowNum" parameterType="java.lang.String">
+		update LIVE_STUDIO set
+		NOW_NUM=(
+		select count(id) from LIVE_STUDIO_USER where
+		LIVE_STUDIO_ID=#{id,jdbcType=VARCHAR} and
+		IS_DELETED='N'
+		)
+		where ID=#{id,jdbcType=VARCHAR}
+	</update>
+
+	<update id="update"></update>
+
+	<update id="deleteByLogic" parameterType="java.lang.String">
+		update LIVE_STUDIO LS
+		set LS.IS_DELETED = 'Y'
+		where LS.ID=#{id,jdbcType=VARCHAR}
+	</update>
+
+	<delete id="deletePhysics" parameterType="java.lang.String">
+		delete from LIVE_STUDIO LS
+		where LS.ID=#{id,jdbcType=VARCHAR}
+	</delete>
+
+
+	<!-- 插入 -->
+	<insert id="insert" parameterType="com.haoyu.tip.livestudio.entity.LiveStudio">
+		insert into LIVE_STUDIO
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				ID,
+			</if>
+			<if test="title != null">
+				TITLE,
+			</if>
+			<if test="expertNames!=null">
+				EXPERT_NAMES,
+			</if>
+			<if test="startTime!=null">
+				START_TIME,
+			</if>
+			<if test="endTime!=null">
+				END_TIME,
+			</if>
+			<if test="description != null">
+				DESCRIPTION,
+			</if>
+			<if test="nowNum != null">
+				NOW_NUM,
+			</if>
+			<if test="maxNum != null">
+				MAX_NUM,
+			</if>
+			<if test="updatedby!=null">
+				UPDATEBY,
+			</if>
+			<if test="createTime != null">
+				CREATE_TIME,
+			</if>
+			<if test="updateTime != null">
+				UPDATE_TIME,
+			</if>
+			<if test="isDeleted != null">
+				IS_DELETED,
+			</if>
+			<if test="version != null">
+				VERSION
+			</if>
+
+		</trim>
+
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id},
+			</if>
+			<if test="title != null">
+				#{title},
+			</if>
+			<if test="expertNames!=null">
+				#{expertNames},
+			</if>
+			<if test="startTime!=null">
+				#{startTime},
+			</if>
+			<if test="endTime!=null">
+				#{endTime},
+			</if>
+			<if test="description != null">
+				#{description},
+			</if>
+			<if test="nowNum != null">
+				#{nowNum},
+			</if>
+			<if test="maxNum != null">
+				#{maxNum},
+			</if>
+			<if test="updatedby!=null">
+				#{updatedby.id},
+			</if>
+			<if test="createTime != null">
+				#{createTime},
+			</if>
+			<if test="updateTime != null">
+				#{updateTime},
+			</if>
+			<if test="isDeleted != null">
+				#{isDeleted},
+			</if>
+			<if test="version != null">
+				#{version}
+			</if>
+		</trim>
+	</insert>
+
+</mapper>

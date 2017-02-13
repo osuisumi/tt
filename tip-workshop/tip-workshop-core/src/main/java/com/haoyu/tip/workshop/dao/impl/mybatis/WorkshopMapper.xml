@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.haoyu.tip.workshop.dao.impl.mybatis.WorkshopMapper">
+	<resultMap id="BaseResultMap" type="com.haoyu.tip.workshop.entity.Workshop">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="NAME" property="name" jdbcType="VARCHAR" />
+		<result column="SUMMARY" property="summary" jdbcType="VARCHAR" />
+		<result column="IMAGE_URL" property="imageUrl" jdbcType="VARCHAR" />
+		<result column="STATE" property="state" jdbcType="VARCHAR" />
+		<result column="CREATE_TIME" property="createTime" jdbcType="INTEGER" />
+	    <result column="ROLE" property="workshopAuthorize.role" jdbcType="VARCHAR" />
+	    <result column="AUTHORIZE_STATE" property="workshopAuthorize.state" jdbcType="VARCHAR" />
+	    <result column="CREATOR" property="creator.id" jdbcType="VARCHAR" />	
+	    <collection property="workshopRelations" ofType="com.haoyu.tip.workshop.entity.WorkshopRelation">
+	   		<id column="WORKSHOP_RELATION_ID" property="id" jdbcType="VARCHAR" />
+	    	<result column="RELATION_ID" property="relation.id" jdbcType="VARCHAR" />
+	    	<result column="MEMBER_NUM" property="memberNum" jdbcType="INTEGER" />
+	    	<result column="ACTIVITY_NUM" property="activityNum" jdbcType="INTEGER" />
+	    	<result column="RESOURCE_NUM" property="resourceNum" jdbcType="INTEGER" />
+	    	<result column="FOLLOW_NUM" property="followNum" jdbcType="INTEGER" />
+	    	<result column="PLAN_NUM" property="planNum" jdbcType="INTEGER" />
+	    </collection>
+	</resultMap>
+	<resultMap id="MasterMap" type="com.haoyu.tip.workshop.entity.WorkshopAuthorize" >
+		<result column="WORKSHOP_ID" property="workshop.id" jdbcType="VARCHAR" />
+		<result column="ID" property="user.id" jdbcType="VARCHAR" />
+		<result column="REAL_NAME" property="user.realName" jdbcType="VARCHAR" />	
+		<result column="AVATAR" property="user.avatar" jdbcType="VARCHAR" />	
+	</resultMap>
+	<resultMap id="WorkshopMap" type="com.haoyu.tip.workshop.entity.Workshop">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="NAME" property="name" jdbcType="VARCHAR" />
+		<result column="SUMMARY" property="summary" jdbcType="VARCHAR" />
+		<result column="IMAGE_URL" property="imageUrl" jdbcType="VARCHAR" />
+		<result column="STATE" property="state" jdbcType="VARCHAR" />
+		<result column="CREATE_TIME" property="createTime" jdbcType="INTEGER" />
+		<result column="WORKSHOP_AUTHORIZE_ID" property="workshopAuthorize.id" jdbcType="VARCHAR" />
+	    <result column="ROLE" property="workshopAuthorize.role" jdbcType="VARCHAR" />
+	    <result column="AUTHORIZE_STATE" property="workshopAuthorize.state" jdbcType="VARCHAR" />
+	    <result column="CREATOR" property="creator.id" jdbcType="VARCHAR" />	
+	    <collection property="workshopRelations" ofType="com.haoyu.tip.workshop.entity.WorkshopRelation">
+	   		<id column="WORKSHOP_RELATION_ID" property="id" jdbcType="VARCHAR" />
+	    	<result column="RELATION_ID" property="relation.id" jdbcType="VARCHAR" />
+	    	<result column="MEMBER_NUM" property="memberNum" jdbcType="INTEGER" />
+	    	<result column="ACTIVITY_NUM" property="activityNum" jdbcType="INTEGER" />
+	    	<result column="RESOURCE_NUM" property="resourceNum" jdbcType="INTEGER" />
+	    	<result column="FOLLOW_NUM" property="followNum" jdbcType="INTEGER" />
+	    	<result column="PLAN_NUM" property="planNum" jdbcType="INTEGER" />
+	    </collection>
+	    <collection property="masters" ofType="com.haoyu.sip.core.entity.User">
+			<id column="USER_ID" property="id" jdbcType="VARCHAR" />
+			<result column="REAL_NAME" property="realName" jdbcType="VARCHAR" />
+			<result column="AVATAR" property="avatar" jdbcType="VARCHAR" />
+		</collection>
+	</resultMap>
+	<sql id="Base_Column_List">
+		ID, NAME, SUMMARY, IMAGE_URL, STATE, CREATOR, CREATE_TIME
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="string">
+		select WS.ID,WS.NAME,WS.SUMMARY,WS.IMAGE_URL,WS.STATE,WS.CREATE_TIME,WS.CREATOR,
+	    WSR.ID WORKSHOP_RELATION_ID,WSR.MEMBER_NUM,WSR.ACTIVITY_NUM,WSR.RESOURCE_NUM, WSR.RELATION_ID, WSR.FOLLOW_NUM,WSR.PLAN_NUM
+	  	from WORKSHOP WS
+	  	join WORKSHOP_RELATION WSR
+	  	on WS.ID = WSR.WORKSHOP_ID
+	  	and WSR.IS_DELETED = 'N'
+		where WS.IS_DELETED = 'N'
+		and WS.ID = #{id,jdbcType=VARCHAR}
+	</select>
+	<select id="selectOne" parameterType="map" resultMap="WorkshopMap">
+		select WS.ID,WS.NAME,WS.SUMMARY,WS.IMAGE_URL,WS.STATE,WS.CREATE_TIME,WS.CREATOR,
+	    WSR.ID WORKSHOP_RELATION_ID,WSR.MEMBER_NUM,WSR.ACTIVITY_NUM,WSR.RESOURCE_NUM, WSR.RELATION_ID, WSR.FOLLOW_NUM,WSR.PLAN_NUM,
+	    BUV.ID USER_ID, BUV.REAL_NAME, BUV.AVATAR
+	    <if test="userId != null and userId != ''">
+	    	,WSA.ID WORKSHOP_AUTHORIZE_ID,WSA.ROLE,WSA.STATE AUTHORIZE_STATE
+	    </if>
+	  	from WORKSHOP WS
+	  	join WORKSHOP_RELATION WSR
+	  	on WS.ID = WSR.WORKSHOP_ID
+	  	and WSR.IS_DELETED = 'N'
+  		<if test="userId != null and userId != ''">
+  			left join WORKSHOP_AUTHORIZE WSA
+	  		on WSA.WORKSHOP_ID = WS.ID
+	  		and WSA.IS_DELETED = 'N'
+  			and WSA.USER_ID = #{userId,jdbcType=VARCHAR}
+  		</if>
+  		left join WORKSHOP_AUTHORIZE WSA1
+  		on WSA1.WORKSHOP_ID = WS.ID
+  		and WSA1.IS_DELETED = 'N'
+  		and WSA1.ROLE = 'master'
+  		left join BASE_USER_VIEW BUV
+  		on BUV.ID = WSA1.USER_ID
+		where WS.IS_DELETED = 'N'
+		and WS.ID = #{id, jdbcType=VARCHAR}
+	</select>
+	<select id="select" resultMap="BaseResultMap" parameterType="map">
+		select WS.ID,WS.NAME,WS.SUMMARY,WS.IMAGE_URL,WS.STATE,WS.CREATE_TIME,WS.CREATOR,
+	    WSR.ID WORKSHOP_RELATION_ID,WSR.MEMBER_NUM,WSR.ACTIVITY_NUM,WSR.RESOURCE_NUM, WSR.RELATION_ID, WSR.FOLLOW_NUM
+	    <if test="userId != null and userId != ''">
+	    	,WSA.ROLE,WSA.STATE AUTHORIZE_STATE
+	    </if>
+	  	from WORKSHOP WS
+	  	join WORKSHOP_RELATION WSR
+	  	on WS.ID = WSR.WORKSHOP_ID
+	  	and WSR.IS_DELETED = 'N'
+  		<if test="userId != null and userId != ''">
+  			left join WORKSHOP_AUTHORIZE WSA
+	  		on WSA.WORKSHOP_ID = WS.ID
+	  		and WSA.IS_DELETED = 'N'
+  			and WSA.USER_ID = #{userId,jdbcType=VARCHAR}
+  		</if>
+		where WS.IS_DELETED = 'N'
+		<if test="relationId != null and relationId != ''">
+			and WSR.RELATION_ID = #{relationId}
+		</if>
+		<if test="creator != null and creator != ''">
+			and WS.CREATOR = #{creator}
+		</if>
+		<if test="type != null and type != ''">
+			and WS.TYPE = #{type}
+		</if>
+		<if test="ids != null and ids.size > 0 ">
+			and WS.ID in 
+			<foreach collection="ids" open="(" close=")" separator="," item="item">
+				#{item}
+			</foreach>
+		</if>
+		<if test="name != null and name != ''">
+			and WS.NAME like '%${name}%'
+		</if>
+		<if test="id != null and id != ''">
+			and WS.ID = #{id}
+		</if>
+	</select>
+	<insert id="insert" parameterType="com.haoyu.tip.workshop.entity.Workshop">
+		insert into WORKSHOP
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				ID,
+			</if>
+			<if test="name != null">
+				NAME,
+			</if>
+			<if test="summary != null">
+				SUMMARY,
+			</if>
+			<if test="imageUrl != null">
+				IMAGE_URL,
+			</if>
+			<if test="state != null">
+				STATE,
+			</if>
+			<if test="type != null">
+				TYPE,
+			</if>
+			<if test="creator != null and creator.id != null">
+				CREATOR,
+			</if>
+			<if test="createTime != null and createTime > 0">
+				CREATE_TIME,
+			</if>
+			<if test="updatedby != null and updatedby.id != null">
+				UPDATEDBY,
+			</if>
+			<if test="updateTime != null and updateTime > 0">
+				UPDATE_TIME,
+			</if>
+			<if test="version != null">
+				VERSION,
+			</if>
+			<if test="isDeleted != null">
+				IS_DELETED,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=VARCHAR},
+			</if>
+			<if test="name != null">
+				#{name,jdbcType=VARCHAR},
+			</if>
+			<if test="summary != null">
+				#{summary,jdbcType=VARCHAR},
+			</if>
+			<if test="imageUrl != null">
+				#{imageUrl,jdbcType=VARCHAR},
+			</if>
+			<if test="state != null">
+				#{state,jdbcType=VARCHAR},
+			</if>
+			<if test="type != null">
+				#{type,jdbcType=VARCHAR},
+			</if>
+			<if test="creator != null and creator.id != null">
+				#{creator.id,jdbcType=VARCHAR},
+			</if>
+			<if test="createTime != null and createTime > 0">
+				#{createTime,jdbcType=INTEGER},
+			</if>
+			<if test="updatedby != null and updatedby.id != null">
+				#{updatedby.id,jdbcType=VARCHAR},
+			</if>
+			<if test="updateTime != null and updateTime > 0">
+				#{updateTime,jdbcType=INTEGER},
+			</if>
+			<if test="version != null">
+				#{version,jdbcType=DECIMAL},
+			</if>
+			<if test="isDeleted != null">
+				#{isDeleted,jdbcType=CHAR},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKey" parameterType="com.haoyu.tip.workshop.entity.Workshop">
+		update WORKSHOP
+		<set>
+			<if test="name != null">
+				NAME = #{name,jdbcType=VARCHAR},
+			</if>
+			<if test="summary != null">
+				SUMMARY = #{summary,jdbcType=VARCHAR},
+			</if>
+			<if test="imageUrl != null">
+				IMAGE_URL = #{imageUrl,jdbcType=VARCHAR},
+			</if>
+			<if test="state != null">
+				STATE = #{state,jdbcType=VARCHAR},
+			</if>
+			<if test="updatedby != null and updatedby.id != null">
+				UPDATEDBY = #{updatedby.id,jdbcType=VARCHAR},
+			</if>
+			<if test="updateTime != null and updateTime > 0">
+				UPDATE_TIME = #{updateTime,jdbcType=INTEGER},
+			</if>
+			<if test="isDeleted != null">
+				IS_DELETED = #{isDeleted,jdbcType=CHAR},
+			</if>
+		</set>
+		,VERSION = VERSION + 1
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<update id="deleteByLogic" parameterType="com.haoyu.tip.workshop.entity.Workshop">
+		update WORKSHOP
+		set IS_DELETED = 'Y', UPDATE_TIME = #{updateTime,jdbcType=INTEGER}
+		<if test="updatedby != null and updatedby.id != null">
+			,UPDATEDBY = #{updatedby.id,jdbcType=VARCHAR}
+		</if>
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<select id="selectByRole" parameterType="map" resultMap="BaseResultMap">
+		select WS.ID, WS.NAME 
+		from WORKSHOP WS
+		join WORKSHOP_AUTHORIZE WSA
+		on WS.ID = WSA.WORKSHOP_ID
+		and WSA.IS_DELETED = 'N'
+		and WSA.USER_ID = #{userId, jdbcType=VARCHAR}
+		<if test="role != null and role != ''">
+			and WSA.ROLE = #{role, jdbcType=VARCHAR}
+		</if>
+		where WS.IS_DELETED = 'N'
+		and exists (select 1 from WORKSHOP_RELATION WSR where WORKSHOP_ID = WS.ID and IS_DELETED = 'N' and RELATION_ID = #{relationId, jdbcType=VARCHAR})
+	</select>
+	<select id="getCount" parameterType="map" resultType="int">
+		select count(WS.ID)
+		from WORKSHOP WS
+		where WS.IS_DELETED = 'N'
+		<if test="relationId != null and relationId != ''">
+			and exists (select 1 from WORKSHOP_RELATION where IS_DELETED = 'N' and RELATION_ID = #{relationId})
+		</if>
+	</select>
+	<delete id="deleteByIds" parameterType="map">
+		update WORKSHOP
+		set IS_DELETED = 'Y', UPDATE_TIME = #{entity.updateTime,jdbcType=INTEGER}
+		<if test="entity.updatedby != null and entity.updatedby.id != null">
+			,UPDATEDBY = #{entity.updatedby.id,jdbcType=VARCHAR}
+		</if>
+		where ID in 
+		<foreach collection="ids" open="(" separator="," close=")" item="item">
+			#{item}
+		</foreach>
+	</delete>
+</mapper>

@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.haoyu.tip.subjectgroup.dao.impl.mybatis.SubjectGroupMapper">
+	<resultMap id="BaseResultMap" type="com.haoyu.tip.subjectgroup.entity.SubjectGroup">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="NAME" property="name" jdbcType="VARCHAR" />
+		<result column="SUMMARY" property="summary" jdbcType="VARCHAR" />
+		<result column="SUBJECT_ID" property="subject.id" jdbcType="VARCHAR" />
+		<result column="STAGE" property="stage" jdbcType="VARCHAR" />
+		<result column="STATE" property="state" jdbcType="VARCHAR" />
+		<result column="CREATOR" property="creator.id" jdbcType="VARCHAR" />
+		<result column="CREATE_TIME" property="createTime" jdbcType="DECIMAL" />
+		<result column="SUBJECT_NAME" property="subject.name" jdbcType="VARCHAR" />
+		<result column="ICON" property="subject.icon" jdbcType="VARCHAR" />
+		<result column="ROLE" property="subjectGroupAuthorize.role" jdbcType="VARCHAR" />
+		<collection property="subjectGroupRelations" ofType="com.haoyu.tip.subjectgroup.entity.SubjectGroupRelation" >
+			<id column="SUBJECT_GROUP_RELATION_ID" property="id" jdbcType="VARCHAR" />
+			<result column="RELATION_ID" property="relation.id" jdbcType="VARCHAR" />
+			<result column="MEMBER_NUM" property="memberNum" jdbcType="DECIMAL" />
+			<result column="ACTIVITY_NUM" property="activityNum" jdbcType="DECIMAL" />
+			<result column="PLAN_NUM" property="planNum" jdbcType="DECIMAL" />
+		</collection>
+	</resultMap>
+	<resultMap id="SubjectGroupMap" type="com.haoyu.tip.subjectgroup.entity.SubjectGroup">
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="NAME" property="name" jdbcType="VARCHAR" />
+		<result column="SUMMARY" property="summary" jdbcType="VARCHAR" />
+		<result column="SUBJECT_ID" property="subject.id" jdbcType="VARCHAR" />
+		<result column="STAGE" property="stage" jdbcType="VARCHAR" />
+		<result column="STATE" property="state" jdbcType="VARCHAR" />
+		<result column="CREATOR" property="creator.id" jdbcType="VARCHAR" />
+		<result column="CREATE_TIME" property="createTime" jdbcType="DECIMAL" />
+		<result column="SUBJECT_NAME" property="subject.name" jdbcType="VARCHAR" />
+		<result column="ICON" property="subject.icon" jdbcType="VARCHAR" />
+		<result column="ROLE" property="subjectGroupAuthorize.role" jdbcType="VARCHAR" />
+		<collection property="masters" ofType="com.haoyu.sip.core.entity.User">
+			<id column="USER_ID" property="id" jdbcType="VARCHAR" />
+			<result column="MASTER_NAME" property="realName" jdbcType="VARCHAR" />
+		</collection>
+		<collection property="subjectGroupRelations" ofType="com.haoyu.tip.subjectgroup.entity.SubjectGroupRelation" >
+			<id column="SUBJECT_GROUP_RELATION_ID" property="id" jdbcType="VARCHAR" />
+			<result column="RELATION_ID" property="relation.id" jdbcType="VARCHAR" />
+			<result column="MEMBER_NUM" property="memberNum" jdbcType="DECIMAL" />
+			<result column="ACTIVITY_NUM" property="activityNum" jdbcType="DECIMAL" />
+			<result column="PLAN_NUM" property="planNum" jdbcType="DECIMAL" />
+		</collection>
+	</resultMap>
+	<sql id="Base_Column_List">
+		ID, NAME, SUMMARY, SUBJECT_ID, IMAGE_URL, STAGE, STATE, CREATOR, CREATE_TIME
+	</sql>
+	<select id="selectByPrimaryKey" resultMap="SubjectGroupMap" parameterType="java.lang.String">
+		select SG.ID, SG.NAME, SG.SUMMARY, SG.SUBJECT_ID, SG.STAGE, SG.STATE, SG.CREATOR, SG.CREATE_TIME,
+		S.NAME SUBJECT_NAME, S.ICON,
+		SGR.MEMBER_NUM, SGR.ACTIVITY_NUM, SGR.PLAN_NUM, SGR.ID SUBJECT_GROUP_RELATION_ID, SGR.RELATION_ID,
+		
+		(select BUV.REAL_NAME from BASE_USER_VIEW BUV where BUV.ID = SGA.USER_ID) MASTER_NAME,
+		(select BUV.ID from BASE_USER_VIEW BUV where BUV.ID = SGA.USER_ID) USER_ID
+		
+		from SUBJECT_GROUP SG
+		join SUBJECT S
+		on S.ID = SG.SUBJECT_ID
+		and S.IS_DELETED = 'N'
+		join SUBJECT_GROUP_RELATION SGR
+		on SGR.SUBJECT_GROUP_ID = SG.id
+		AND SGR.IS_DELETED = 'N'
+		left join SUBJECT_GROUP_AUTHORIZE SGA
+		on SGA.SUBJECT_GROUP_ID = SG.ID
+		and SGA.IS_DELETED = 'N'
+		and ROLE = 'master'
+		where SG.ID = #{id,jdbcType=VARCHAR}
+	</select>
+	<select id="select" parameterType="map" resultMap="BaseResultMap">
+		select SG.ID, SG.NAME, SG.SUMMARY, SG.SUBJECT_ID, SG.STAGE, SG.STATE, SG.CREATOR, SG.CREATE_TIME,
+		S.NAME SUBJECT_NAME, S.ICON,
+		SGR.MEMBER_NUM, SGR.ACTIVITY_NUM, SGR.PLAN_NUM, SGR.ID SUBJECT_GROUP_RELATION_ID, SGR.RELATION_ID
+		from SUBJECT_GROUP SG
+		join SUBJECT S
+		on S.ID = SG.SUBJECT_ID
+		and S.IS_DELETED = 'N'
+		join SUBJECT_GROUP_RELATION SGR
+		on SGR.SUBJECT_GROUP_ID = SG.id
+		AND SGR.IS_DELETED = 'N' 
+		where SG.IS_DELETED = 'N'
+		<if test="name != null and name != ''">
+			and SG.NAME like '%${name}%'
+		</if>
+		<if test="userId != null and userId != ''">
+			and (SG.CREATOR = #{userId} or exists (select 1 from SUBJECT_GROUP_AUTHORIZE where SUBJECT_GROUP_ID = SG.ID and IS_DELETED = 'N' and USER_ID = #{userId} and ROLE = 'master'))
+		</if>
+		<if test="master != null and master != ''">
+			and exists (select 1 from SUBJECT_GROUP_AUTHORIZE where SUBJECT_GROUP_ID = SG.ID and IS_DELETED = 'N' and USER_ID = #{master} and ROLE = 'master')
+		</if>
+		<if test="ids != null and ids.size > 0">
+			and SG.ID in 
+			<foreach collection="ids" open="(" close=")" separator="," item="item">
+				#{item}
+			</foreach>
+		</if>
+		<if test="relationId != null and relationId != ''">
+			and SGR.RELATION_ID = #{relationId}
+		</if>
+	</select>
+	<insert id="insert" parameterType="com.haoyu.tip.subjectgroup.entity.SubjectGroup">
+		insert into SUBJECT_GROUP
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				ID,
+			</if>
+			<if test="name != null">
+				NAME,
+			</if>
+			<if test="summary != null">
+				SUMMARY,
+			</if>
+			<if test="subject != null">
+				SUBJECT_ID,
+			</if>
+			<if test="imageUrl != null">
+				IMAGE_URL,
+			</if>
+			<if test="stage != null">
+				STAGE,
+			</if>
+			<if test="state != null">
+				STATE,
+			</if>
+			<if test="creator != null and creator.id != null">
+				CREATOR,
+			</if>
+			<if test="createTime != null and createTime > 0">
+				CREATE_TIME,
+			</if>
+			<if test="updatedby != null and updatedby.id != null">
+				UPDATEDBY,
+			</if>
+			<if test="updateTime != null and updateTime > 0">
+				UPDATE_TIME,
+			</if>
+			<if test="isDeleted != null">
+				IS_DELETED,
+			</if>
+			<if test="version != null">
+				VERSION,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=VARCHAR},
+			</if>
+			<if test="name != null">
+				#{name,jdbcType=VARCHAR},
+			</if>
+			<if test="summary != null">
+				#{summary,jdbcType=VARCHAR},
+			</if>
+			<if test="subject != null">
+				#{subject.id,jdbcType=VARCHAR},
+			</if>
+			<if test="imageUrl != null">
+				#{imageUrl,jdbcType=VARCHAR},
+			</if>
+			<if test="stage != null">
+				#{stage,jdbcType=VARCHAR},
+			</if>
+			<if test="state != null">
+				#{state,jdbcType=VARCHAR},
+			</if>
+			<if test="creator != null and creator.id != null">
+				#{creator.id,jdbcType=VARCHAR},
+			</if>
+			<if test="createTime != null and createTime > 0">
+				#{createTime,jdbcType=DECIMAL},
+			</if>
+			<if test="updatedby != null and updatedby.id != null">
+				#{updatedby.id,jdbcType=VARCHAR},
+			</if>
+			<if test="updateTime != null and updateTime > 0">
+				#{updateTime,jdbcType=DECIMAL},
+			</if>
+			<if test="isDeleted != null">
+				#{isDeleted,jdbcType=CHAR},
+			</if>
+			<if test="version != null">
+				#{version,jdbcType=DECIMAL},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKey" parameterType="com.haoyu.tip.subjectgroup.entity.SubjectGroup">
+		update SUBJECT_GROUP
+		<set>
+			<if test="name != null">
+				NAME = #{name,jdbcType=VARCHAR},
+			</if>
+			<if test="summary != null">
+				SUMMARY = #{summary,jdbcType=VARCHAR},
+			</if>
+			<if test="subject != null">
+				SUBJECT_ID = #{subject.id,jdbcType=VARCHAR},
+			</if>
+			<if test="imageUrl != null">
+				IMAGE_URL = #{imageUrl,jdbcType=VARCHAR},
+			</if>
+			<if test="stage != null">
+				STAGE = #{stage,jdbcType=VARCHAR},
+			</if>
+			<if test="state != null">
+				STATE = #{state,jdbcType=VARCHAR},
+			</if>
+			<if test="updatedby != null and updatedby.id != null">
+				UPDATEDBY = #{updatedby.id,jdbcType=VARCHAR},
+			</if>
+			<if test="updateTime != null">
+				UPDATE_TIME = #{updateTime,jdbcType=INTEGER},
+			</if>
+			<if test="isDeleted != null">
+				IS_DELETED = #{isDeleted,jdbcType=CHAR},
+			</if>
+		</set>
+		,VERSION = VERSION + 1
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<update id="deleteByLogic" parameterType="com.haoyu.tip.subjectgroup.entity.SubjectGroup">
+		update SUBJECT_GROUP
+		set IS_DELETED = 'Y', UPDATE_TIME = #{updateTime,jdbcType=INTEGER}
+		<if test="updatedby != null and updatedby.id != null and updatedby.id != ''">
+			,UPDATEDBY = #{updatedby.id,jdbcType=VARCHAR}
+		</if>
+		where ID = #{id,jdbcType=VARCHAR}
+	</update>
+	<select id="selectByRole" parameterType="map" resultMap="BaseResultMap">
+		select SG.ID, SG.NAME 
+		from SUBJECT_GROUP SG
+		join SUBJECT_GROUP_AUTHORIZE SGA
+		on SG.ID = SGA.SUBJECT_GROUP_ID
+		and SGA.IS_DELETED = 'N'
+		and SGA.USER_ID = #{userId, jdbcType=VARCHAR}
+		<if test="role != null and role != ''">
+			and SGA.ROLE = #{role, jdbcType=VARCHAR}
+		</if>
+		where SG.IS_DELETED = 'N'
+		and exists (select 1 from SUBJECT_GROUP_RELATION SGR where SUBJECT_GROUP_ID = SG.ID and IS_DELETED = 'N' and RELATION_ID = #{relationId, jdbcType=VARCHAR})
+	</select>
+	<select id="getCount" parameterType="map" resultType="int">
+		select count(SG.ID)
+		from SUBJECT_GROUP SG
+		where SG.IS_DELETED = 'N'
+		<if test="relationId != null and relationId != ''">
+			and exists (select 1 from SUBJECT_GROUP_RELATION where IS_DELETED = 'N' and RELATION_ID = #{relationId})
+		</if>
+	</select>
+</mapper>
